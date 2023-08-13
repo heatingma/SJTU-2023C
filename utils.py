@@ -16,6 +16,10 @@ class BASIC:
         self.married = married
         self.career = career
         
+    def __repr__(self):
+        message = "id, birth, sex, nation, nation_name, edu, married, career"
+        return f"{self.__class__.__name__}({message})"        
+       
         
 class SMOKE:
     def __init__(self, smoke, begin_smoke, smoke_days_per_week, smoke_nums_per_day,
@@ -26,6 +30,11 @@ class SMOKE:
         self.smoke_nums_per_day = smoke_nums_per_day
         self.passive_smoke = passive_smoke
         self.passive_smoke_days_per_week = passive_smoke_days_per_week
+        
+    def __repr__(self):
+        message = "smoke, begin_smoke, smoke_days_per_week, smoke_nums_per_day, "
+        message += "passive_smoke, passive_smoke_days_per_week"
+        return f"{self.__class__.__name__}({message})"      
 
 
 class DRINK:
@@ -39,12 +48,21 @@ class DRINK:
         self.yellow_wine_info = yellow_wine_info
         self.wine_info = wine_info
         
+    def __repr__(self):
+        message = "drink, drink_years, high_baijiu_info, low_baijiu_info, "  
+        message += "beer_info, yellow_wine_info, wine_info"
+        return f"{self.__class__.__name__}({message})"            
+    
     
 class WINE:
     def __init__(self, drink, drink_days_per_week, drink_volume) -> None:
         self.drink = drink
         self.drink_days_per_week = drink_days_per_week
         self.drink_volume = drink_volume
+        
+    def __repr__(self):
+        message = "drink, drink_days_per_week, drink_volume"
+        return f"{self.__class__.__name__}({message})" 
 
 
 class MEALS:
@@ -53,6 +71,10 @@ class MEALS:
         self.lunch = lunch
         self.dinner = dinner
         
+    def __repr__(self):
+        message = "breakfast, lunch, dinner"
+        return f"{self.__class__.__name__}({message})"         
+    
     
 class MEAL:
     def __init__(self, no_eat, home, take, canteen, out, 
@@ -64,6 +86,10 @@ class MEAL:
         self.out = out
         self.persons_of_weekdays = persons_of_weekdays
         self.persons_of_weekends = persons_of_weekends
+        
+    def __repr__(self):
+        message = "no_eat, home, take, canteen, out, persons_of_weekdays, persons_of_weekends"
+        return f"{self.__class__.__name__}({message})"    
 
 
 class ACTIVITY:
@@ -74,12 +100,21 @@ class ACTIVITY:
         self.intensity = intensity
         self.seconds_per_day = seconds_per_day
         
+    def __repr__(self):
+        message = "work, housework, exercise, intensity, seconds_per_day"
+        return f"{self.__class__.__name__}({message})"            
+
 
 class FOODS:
     def __init__(self, *foods):
         for i, food in enumerate(foods, start=4):
             setattr(self, f"D{i}", food)
-
+            
+    def __repr__(self):
+        message = "D4 to D30"
+        return f"{self.__class__.__name__}({message})"    
+    
+    
 class FOOD:
     def __init__(self, eat, per_day, per_week, per_month, consume):
         self.eat = eat
@@ -87,7 +122,11 @@ class FOOD:
         self.per_week = per_week
         self.per_month = per_month
         self.consume = consume
-       
+        
+    def __repr__(self):
+        message = "eat, per_day, per_week, per_month, consume"
+        return f"{self.__class__.__name__}({message})"           
+        
         
 class HEALTH:
     def __init__(self, hypertension, diabetes, D1, D2, D3, D4, D5, D6 ,D7, D8) -> None:
@@ -101,6 +140,10 @@ class HEALTH:
         self.D6 = D6
         self.D7 = D7
         self.D8 = D8
+        
+    def __repr__(self):
+        message = "hypertension, diabetes, D1, D2, D3, D4, D5, D6 ,D7, D8"
+        return f"{self.__class__.__name__}({message})"        
     
     
 class DISEASE:
@@ -113,6 +156,11 @@ class DISEASE:
         self.exercise = exercise
         self.others = others
         
+    def __repr__(self):
+        message = "last, ill, methods, medication, control_diet, exercise, others"
+        return f"{self.__class__.__name__}({message})"  
+    
+              
 class BODY:
     def __init__(self, height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, 
                  blood_sugar, high_lipoprotein, low_lipoprotein, triglycerides, uric_acid):
@@ -129,7 +177,11 @@ class BODY:
         self.low_lipoprotein = low_lipoprotein
         self.triglycerides = triglycerides
         self.uric_acid = uric_acid
-
+        
+    def __repr__(self):
+        message = "height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, "
+        message += "blood_sugar, high_lipoprotein, low_lipoprotein, triglycerides, uric_acid"
+        return f"{self.__class__.__name__}({message})"        
 
 class Person:
     def __init__(self, data):
@@ -147,7 +199,24 @@ class Person:
                                   *data[213:221])
         self.body_info = BODY(*data[221:234])
         
+    def __repr__(self):
+        message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
+        message += "activity_info, health_info, body_info"
+        return f"{self.__class__.__name__}({message})"         
 
+
+class Persons:
+    def __init__(self):
+        self.person_dict = dict()
+    
+    def add_person(self, person: Person):
+        self.person_dict[person.basic_info.id] = person
+        
+    def __repr__(self):
+        message = "person_dict"
+        return f"{self.__class__.__name__}({message})" 
+    
+           
 ###################################################################
 #                     Data-Processed Function                     #
 ###################################################################
@@ -166,12 +235,24 @@ def replace_nan_with_none(arr):
         result.append(new_row)
     return np.array(result)
 
+
 def read_data(filename, save_path="data/processed_data.npy"):
     data = np.array(pd.read_excel(filename))
     data = replace_nan_with_none(data[1:])
     np.save(save_path, data)
     
-    
+
+def write_data(filename="data/processed_data.npy"):
+    data = np.load(filename, allow_pickle=True)
+    persons = Persons()
+    import pdb
+    pdb.set_trace()
+    for person_data in data:
+        persons.add_person(Person(person_data))
+    pdb.set_trace()
+        
+        
 if __name__ == '__main__':
     filename = 'data/附件2 慢性病及相关因素流调数据.xlsx'
     read_data(filename)
+    write_data()
