@@ -248,6 +248,3 @@ def get_data(filename="data/processed_data.npy"):
     for person_data in data:
         persons.add_person(Person(person_data))
     return persons
-
-        
-        
