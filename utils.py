@@ -2,6 +2,17 @@ import numpy as np
 import pandas as pd
 
 ###################################################################
+#                          Food Category                          #
+###################################################################
+
+POTATOES = ['D4', 'D5', 'D6', 'D7', 'D8', 'D27']
+FRUITS_VEGETABLES = ['D22', 'D23', 'D24', 'D25', 'D26', 'D28', 'D29']
+LPFEM = ['D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17']
+BEANS = ['D18', 'D19', 'D20', 'D21']
+OTHERS = ['D30']
+
+
+###################################################################
 #                        Information Class                        #
 ###################################################################
 
@@ -55,7 +66,7 @@ class DRINK:
     
     
 class WINE:
-    def __init__(self, drink, drink_days_per_week, drink_volume) -> None:
+    def __init__(self, drink, drink_days_per_week, drink_volume):
         self.drink = drink
         self.drink_days_per_week = drink_days_per_week
         self.drink_volume = drink_volume
@@ -88,7 +99,8 @@ class MEAL:
         self.persons_of_weekends = persons_of_weekends
         
     def __repr__(self):
-        message = "no_eat, home, take, canteen, out, persons_of_weekdays, persons_of_weekends"
+        message = "no_eat, home, take, canteen, out, "
+        message += "persons_of_weekdays, persons_of_weekends"
         return f"{self.__class__.__name__}({message})"    
 
 
@@ -109,9 +121,39 @@ class FOODS:
     def __init__(self, *foods):
         for i, food in enumerate(foods, start=4):
             setattr(self, f"D{i}", food)
-            
+        self.data_process()
+                     
+    def data_process(self):
+        self.num_day_foods = 0
+        self.num_week_foods = 0
+        self.count_num(POTATOES, "num_potatoes")
+        self.count_num(FRUITS_VEGETABLES, "num_fruits_vegetables")
+        self.count_num(LPFEM, "num_lpfem")
+        self.count_num(BEANS, "num_beans")
+        self.count_num(OTHERS, "num_others")
+        
+    def count_num(self, type=POTATOES, count="num_potatoes"):
+        counter = 0
+        for attr in type:
+            food = getattr(self, attr)
+            if food.per_day:
+                self.num_day_foods += 1
+                self.num_week_foods += 1
+                counter += 1
+            elif food.per_week:
+                self.num_day_foods += food.per_week / 7
+                self.num_week_foods += 1
+                counter += food.per_week / 7
+            elif food.per_month:
+                self.num_day_foods += food.per_month / 30
+                self.num_week_foods += food.per_month / 4
+                counter += food.per_month / 30 
+        setattr(self, count, counter)
+
+                                                    
     def __repr__(self):
-        message = "D4 to D30"
+        message = "D4 to D30, num_day_foods, num_week_foods, num_potatoes, "
+        message += "num_fruits_vegetables, num_lpfem, num_beans, num_others"
         return f"{self.__class__.__name__}({message})"    
     
     
@@ -177,11 +219,22 @@ class BODY:
         self.low_lipoprotein = low_lipoprotein
         self.triglycerides = triglycerides
         self.uric_acid = uric_acid
+        self.data_process()
+        
+    def data_process(self):
+        if self.weight and self.height:
+            self.BMI = self.weight / (self.height * self.height) * 10000
+            self.BMI_NORMAL = True if (self.BMI < 24 and self.BMI >= 18.5) else False
+        else:
+            self.BMI = None
+            self.BMI_NORMAL = None
         
     def __repr__(self):
         message = "height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, "
-        message += "blood_sugar, high_lipoprotein, low_lipoprotein, triglycerides, uric_acid"
+        message += "blood_sugar, high_lipoprotein, low_lipoprotein, triglycerides, uric_acid, "
+        message += "BMI, BMI_NORMAL"
         return f"{self.__class__.__name__}({message})"        
+
 
 class Person:
     def __init__(self, data):
@@ -227,7 +280,7 @@ def replace_nan_with_none(arr):
         new_row = list()
         for value in row:
             try:
-                # replace nan with None
+                # replace nan with none
                 new_row.append(None if np.isnan(value) else value)
             except:
                 # chinese language
