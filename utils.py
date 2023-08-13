@@ -242,17 +242,12 @@ def read_data(filename, save_path="data/processed_data.npy"):
     np.save(save_path, data)
     
 
-def write_data(filename="data/processed_data.npy"):
+def get_data(filename="data/processed_data.npy"):
     data = np.load(filename, allow_pickle=True)
     persons = Persons()
-    import pdb
-    pdb.set_trace()
     for person_data in data:
         persons.add_person(Person(person_data))
-    pdb.set_trace()
+    return persons
+
         
         
-if __name__ == '__main__':
-    filename = 'data/附件2 慢性病及相关因素流调数据.xlsx'
-    read_data(filename)
-    write_data()
