@@ -111,9 +111,19 @@ class ACTIVITY:
         self.exercise = exercise
         self.intensity = intensity
         self.seconds_per_day = seconds_per_day
+        self.data_process()
+        
+    def data_process(self):
+        if self.exercise != 1 and self.seconds_per_day is None:
+            self.healthy_exercise = None
+        elif self.exercise != 4 or (self.seconds_per_day * 7 < 150):
+            self.healthy_exercise = False
+        else:
+            self.healthy_exercise = True
         
     def __repr__(self):
         message = "work, housework, exercise, intensity, seconds_per_day"
+        message += "healthy_exercise"
         return f"{self.__class__.__name__}({message})"            
 
 
@@ -126,11 +136,19 @@ class FOODS:
     def data_process(self):
         self.num_day_foods = 0
         self.num_week_foods = 0
+        self.num_potatoes = 0
+        self.num_fruits_vegetables = 0
+        self.num_lpfem = 0
+        self.num_beans = 0
+        self.num_others = 0
         self.count_num(POTATOES, "num_potatoes")
         self.count_num(FRUITS_VEGETABLES, "num_fruits_vegetables")
         self.count_num(LPFEM, "num_lpfem")
         self.count_num(BEANS, "num_beans")
         self.count_num(OTHERS, "num_others")
+        self.balanced_diet = True if (self.num_potatoes>=1) and (self.num_fruits_vegetables>=1) and \
+            (self.num_lpfem>=1) and (self.num_beans>=1) else False
+        self.food_diversity = True if (self.num_day_foods >= 12) and (self.num_week_foods >= 25) else False
         
     def count_num(self, type=POTATOES, count="num_potatoes"):
         counter = 0
@@ -153,7 +171,8 @@ class FOODS:
                                                     
     def __repr__(self):
         message = "D4 to D30, num_day_foods, num_week_foods, num_potatoes, "
-        message += "num_fruits_vegetables, num_lpfem, num_beans, num_others"
+        message += "num_fruits_vegetables, num_lpfem, num_beans, num_others, "
+        message += "balanced_diet, food_diversity"
         return f"{self.__class__.__name__}({message})"    
     
     
@@ -224,15 +243,15 @@ class BODY:
     def data_process(self):
         if self.weight and self.height:
             self.BMI = self.weight / (self.height * self.height) * 10000
-            self.BMI_NORMAL = True if (self.BMI < 24 and self.BMI >= 18.5) else False
+            self.healthy_weight = True if (self.BMI < 24 and self.BMI >= 18.5) else False
         else:
             self.BMI = None
-            self.BMI_NORMAL = None
+            self.healthy_weight = None
         
     def __repr__(self):
         message = "height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, "
         message += "blood_sugar, high_lipoprotein, low_lipoprotein, triglycerides, uric_acid, "
-        message += "BMI, BMI_NORMAL"
+        message += "BMI, healthy_weight"
         return f"{self.__class__.__name__}({message})"        
 
 
@@ -251,24 +270,55 @@ class Person:
                                             data[i+5], data[i+6]) for i in range(199, 213, 7)], 
                                   *data[213:221])
         self.body_info = BODY(*data[221:234])
+        self.cal_guideline()
+        
+    def cal_guideline(self):
+        self.balanced_diet = self.foods_info.balanced_diet
+        self.food_diversity = self.foods_info.food_diversity
+        self.healthy_weight = self.body_info.healthy_weight
+        self.healthy_exercise = self.activity_info.healthy_exercise
         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
-        message += "activity_info, health_info, body_info"
+        message += "activity_info, health_info, body_info, balanced_diet, "
+        message += "food_diversity, healthy_weight, healthy_exercise"
         return f"{self.__class__.__name__}({message})"         
 
 
 class Persons:
     def __init__(self):
         self.person_dict = dict()
-    
+        self.message = "person_dict"
+        
     def add_person(self, person: Person):
         self.person_dict[person.basic_info.id] = person
+    
+    def statistics(self, name="balanced_diet"):
+        total = len(self.person_dict)
+        effective = 0
+        meet = 0
+        for person in self.person_dict.values():
+            if getattr(person, name) is not None:
+                effective += 1
+                meet += int(getattr(person, name))
+        setattr(self, "stat_"+name, STATISTICS(name, total, effective, meet))         
+        self.message += (", stat_" + name)
         
     def __repr__(self):
-        message = "person_dict"
+        return f"{self.__class__.__name__}({self.message})" 
+
+
+class STATISTICS:
+    def __init__(self, name, total, effective, meet):
+        self.name = name
+        self.total = total
+        self.effective = effective
+        self.meet = meet
+
+    def __repr__(self):
+        message = "name, total, effective, meet" 
         return f"{self.__class__.__name__}({message})" 
-    
+           
            
 ###################################################################
 #                     Data-Processed Function                     #
