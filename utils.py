@@ -12,7 +12,7 @@ POTATOES = ['D4', 'D5', 'D6', 'D7', 'D8', 'D27']
 FRUITS_VEGETABLES = ['D22', 'D23', 'D24', 'D25', 'D26', 'D28', 'D29']
 LPFEM = ['D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17']
 BEANS = ['D18', 'D19', 'D20', 'D21']
-OTHERS = ['D30']
+BEVERAGE = ['D30']
 
 FRESH_VEGETABLES = ['D22']
 FRESH_FRUITS = ['D28']
@@ -179,12 +179,13 @@ class FOODS:
         self.num_week_foods = 0
         self.count_num([(POTATOES, "num_potatoes"), (LPFEM, "num_lpfem"),
                         (FRUITS_VEGETABLES, "num_fruits_vegetables"),
-                        (BEANS, "num_beans"), (OTHERS, "num_others"),(AQUATIC_PRODUCTS,"frequency_aquatic_products")])
+                        (BEANS, "num_beans"), (BEANS, "num_beans"), (AQUATIC_PRODUCTS,"frequency_aquatic_products")])
         self.count_quantity([(LPFEM, "quantity_lpfem"), (BEANS, "quantity_beans"),
                              (FRESH_VEGETABLES, "quantity_fresh_vegetables"),
                              (FRESH_FRUITS, "quantity_fresh_fruits"),
                              (DAIRY_PRODUCTS, "quantity_dairy_products"),
-                             (CEREAL, "quantity_cereal"), (EGG, "quantity_egg")])
+                             (CEREAL, "quantity_cereal"), (EGG, "quantity_egg"),
+                             (BEVERAGE, "quantity_beverage")])
         self.balanced_diet = True if (self.num_potatoes>=1) and \
             (self.num_fruits_vegetables>=1) and (self.num_lpfem>=1) \
             and (self.num_beans>=1) else False
@@ -242,11 +243,10 @@ class FOODS:
                 elif food.per_month:
                     quantity += food.consume * food.per_month / 30
         setattr(self, count, quantity)
-    
                                                     
     def __repr__(self):
         message = "D4 to D30, num_day_foods, num_week_foods, num_potatoes, "
-        message += "num_fruits_vegetables, num_lpfem, num_beans, num_others, "
+        message += "num_fruits_vegetables, num_lpfem, num_beans, num_beverage, "
         message += "balanced_diet, food_diversity, fresh_vegetables, fresh_fruits, "
         message += "dairy_products, cereal, lpfem, egg, aquatic_products"
         return f"{self.__class__.__name__}({message})"    
@@ -387,8 +387,8 @@ class Persons:
             if evaluate_dict[name] is not None:
                 effective += 1
                 meet += int(evaluate_dict[name])
-        setattr(self, "stat_"+name, STATISTICS(name, total, effective, meet))         
-        self.message += (", stat_" + name)
+        setattr(self, "meet_"+name, STATISTICS(name, total, effective, meet=meet))         
+        self.message += (", meet_" + name)
 
     def get_dataframe(self):
         person_data = pd.DataFrame()
@@ -416,6 +416,25 @@ class Persons:
         plt.show()
 
         
+    
+    def cal_average(self, attrs:list, name):
+        total_val = 0
+        total = len(self.person_dict)
+        effective = 0
+        for person in self.person_dict.values():
+            begin = True
+            for attr in attrs:
+                if begin:
+                    var = getattr(person, attr)
+                    begin = False
+                else:
+                    var = getattr(var, attr)
+            if var is not None:
+                effective += 1
+                total_val += var
+        avarage = total_val / effective
+        setattr(self, "avg_"+name, STATISTICS(name, total, effective, avarage=avarage))
+        self.message += (", avg_" + name)
         
     def __repr__(self):
         return f"{self.__class__.__name__}({self.message})" 
@@ -438,19 +457,24 @@ class EVALUATE:
 
 
 class STATISTICS:
-    def __init__(self, name, total, effective, meet):
+    def __init__(self, name, total, effective, meet=None, avarage=None):
         self.name = name
         self.total = total
         self.effective = effective
         self.meet = meet
+        self.avarage = avarage
 
     def draw(self):
         pass
     
     def __repr__(self):
-        message = "name, total, effective, meet" 
+        message = "name, total, effective"
+        if self.meet:
+            message += ", meet"
+        if self.avarage:
+            message += ", avarage"
         return f"{self.__class__.__name__}({message})" 
-           
+
            
 ###################################################################
 #                     Data-Processed Function                     #
