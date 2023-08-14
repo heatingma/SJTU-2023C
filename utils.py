@@ -358,14 +358,29 @@ class Persons:
         effective = 0
         meet = 0
         for person in self.person_dict.values():
-            if getattr(person, name) is not None:
+            evaluate_info = getattr(person, "evaluate_info")
+            evaluate_dict = getattr(evaluate_info, "evaluate_dict")
+            if evaluate_dict[name] is not None:
                 effective += 1
-                meet += int(getattr(person, name))
+                meet += int(evaluate_dict[name])
         setattr(self, "stat_"+name, STATISTICS(name, total, effective, meet))         
         self.message += (", stat_" + name)
         
     def __repr__(self):
         return f"{self.__class__.__name__}({self.message})" 
+
+
+class EVALUATE:
+    def __init__(self):
+        self.evaluate_dict = dict()
+        self.message = "evaluate_dict: "
+        
+    def add_evaluate(self, name, value):
+        self.evaluate_dict[name] = value
+        self.message += (name + " ")
+        
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.message})"       
 
 
 class STATISTICS:
@@ -375,6 +390,9 @@ class STATISTICS:
         self.effective = effective
         self.meet = meet
 
+    def draw(self):
+        pass
+    
     def __repr__(self):
         message = "name, total, effective, meet" 
         return f"{self.__class__.__name__}({message})" 
