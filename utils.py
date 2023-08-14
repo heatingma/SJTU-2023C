@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
+import matplotlib as mpl
+import seaborn as sns
 
 ###################################################################
 #                          Food Category                          #
@@ -175,7 +178,8 @@ class FOODS:
         self.num_day_foods = 0
         self.num_week_foods = 0
         self.count_num([(POTATOES, "num_potatoes"), (LPFEM, "num_lpfem"),
-                        (FRUITS_VEGETABLES, "num_fruits_vegetables"), (BEANS, "num_beans")])
+                        (FRUITS_VEGETABLES, "num_fruits_vegetables"),
+                         (BEANS, "num_beans"), (AQUATIC_PRODUCTS,"frequency_aquatic_products")])
         self.count_quantity([(LPFEM, "quantity_lpfem"), (BEANS, "quantity_beans"),
                              (FRESH_VEGETABLES, "quantity_fresh_vegetables"),
                              (FRESH_FRUITS, "quantity_fresh_fruits"),
@@ -195,6 +199,7 @@ class FOODS:
         self.cereal = True if (self.quantity_cereal >= 3) else False
         self.lpfem = True if (self.quantity_lpfem >= 2.4) and (self.quantity_lpfem <= 4) else False
         self.egg = True if (self.quantity_egg >= 1) and (self.quantity_egg <=2) else False
+        self.aquatic_products = True if (self.frequency_aquatic_products * 7 >= 1) and (self.frequency_aquatic_products * 7 <= 3) else False
         if self.D33 is None:
             self.light_salt = None
         else:
@@ -384,6 +389,33 @@ class Persons:
                 meet += int(evaluate_dict[name])
         setattr(self, "meet_"+name, STATISTICS(name, total, effective, meet=meet))         
         self.message += (", meet_" + name)
+
+    def get_dataframe(self):
+        person_data = pd.DataFrame()
+
+        for person in self.person_dict.values():
+            person_data = person_data.append(person.evaluate_info.evaluate_dict, ignore_index = True)
+        print(person_data)
+        return person_data
+    
+    def draw(self):
+        Data = self.get_dataframe()
+        counts = Data.apply(pd.value_counts).fillna(0)
+        data = counts.T
+        data['name'] = data.index
+        sns.barplot(x = 'name', y = 0, data = data, color="red")
+        bottom_plot = sns.barplot(x = 'name', y = 1, data=data, color = "#0000A3")
+        topbar = plt.Rectangle((0,0),1,1,fc="red", edgecolor = 'none')
+        bottombar = plt.Rectangle((0,0),1,1,fc='#0000A3',  edgecolor = 'none')
+        l = plt.legend([bottombar, topbar], ['standard', 'nonstandard'], loc=1, ncol = 2, prop={'size':8})
+        l.draw_frame(False)
+        sns.despine(left=True)
+        bottom_plot.set_ylabel("total_nums")
+        bottom_plot.set_xlabel("logTime")
+        bottom_plot.set_xticklabels(data.name, rotation=30, fontsize='small')
+        plt.show()
+
+        
     
     def cal_average(self, attrs:list, name):
         total_val = 0
