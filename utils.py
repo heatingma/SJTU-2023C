@@ -339,9 +339,9 @@ class Person:
         self.evaluate_info.add_evaluate("dairy_products", self.foods_info.dairy_products)
         self.evaluate_info.add_evaluate("cereal", self.foods_info.cereal)
         self.evaluate_info.add_evaluate("lpfem", self.foods_info.lpfem)
-        self.evaluate_info.add_evaluate("aquatic_products", self.aquatic_products)
-        self.evaluate_info.add_evaluate("healthy_weight", self.aquatic_products)
-        self.evaluate_info.add_evaluate("healthy_exercise", self.aquatic_products)
+        self.evaluate_info.add_evaluate("aquatic_products", self.foods_info.aquatic_products)
+        self.evaluate_info.add_evaluate("healthy_weight", self.body_info.healthy_weights)
+        self.evaluate_info.add_evaluate("healthy_exercise", self.activity_info.healthy_exercise)
         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
