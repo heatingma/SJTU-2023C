@@ -179,7 +179,7 @@ class FOODS:
         self.num_week_foods = 0
         self.count_num([(POTATOES, "num_potatoes"), (LPFEM, "num_lpfem"),
                         (FRUITS_VEGETABLES, "num_fruits_vegetables"),
-                        (BEANS, "num_beans"), (BEANS, "num_beans"), (AQUATIC_PRODUCTS,"frequency_aquatic_products")])
+                         (BEANS, "num_beans"), (AQUATIC_PRODUCTS,"frequency_aquatic_products")])
         self.count_quantity([(LPFEM, "quantity_lpfem"), (BEANS, "quantity_beans"),
                              (FRESH_VEGETABLES, "quantity_fresh_vegetables"),
                              (FRESH_FRUITS, "quantity_fresh_fruits"),
