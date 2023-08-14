@@ -377,7 +377,17 @@ class Persons:
     def add_person(self, person: Person):
         self.person_dict[person.basic_info.id] = person
     
-    def statistics(self, name="balanced_diet"):
+    def statistics(self):
+        attrs = self.person_dict[10001].evaluate_info.evaluate_dict.keys()
+        self.stats = list()
+        for attr in attrs:
+            self._statistics(attr)
+            self.stats.append(getattr(self, "meet_"+attr).result())
+        self.stats = np.array(self.stats)
+        self.stats = self.stats[np.argsort(-self.stats[:, 2].astype(float))]
+        return self.stats
+            
+    def _statistics(self, name="balanced_diet"):
         total = len(self.person_dict)
         effective = 0
         meet = 0
@@ -389,34 +399,26 @@ class Persons:
                 meet += int(evaluate_dict[name])
         setattr(self, "meet_"+name, STATISTICS(name, total, effective, meet=meet))         
         self.message += (", meet_" + name)
-
-    def get_dataframe(self):
-        person_data = pd.DataFrame()
-
-        for person in self.person_dict.values():
-            person_data = person_data.append(person.evaluate_info.evaluate_dict, ignore_index = True)
-        print(person_data)
-        return person_data
     
     def draw(self):
-        Data = self.get_dataframe()
-        counts = Data.apply(pd.value_counts).fillna(0)
-        data = counts.T
+        plt.rcParams.update({'font.size': 12})
+        plt.figure(figsize=(14, 10))
+        data = pd.DataFrame(self.stats[:, 1:].astype(float), index=self.stats[:, 0], columns=['False', 'True'])
         data['name'] = data.index
-        sns.barplot(x = 'name', y = 0, data = data, color="red")
-        bottom_plot = sns.barplot(x = 'name', y = 1, data=data, color = "#0000A3")
-        topbar = plt.Rectangle((0,0),1,1,fc="red", edgecolor = 'none')
-        bottombar = plt.Rectangle((0,0),1,1,fc='#0000A3',  edgecolor = 'none')
+        bottom_plot = sns.barplot(x='name', y='True', data=data, color="#0000A3")
+        sns.barplot(x='name', y='False', data=data, color="#FF0000", bottom=data['True'])
+        topbar = plt.Rectangle((0, 0), 1, 1, fc="#FF0000", edgecolor='none')
+        bottombar = plt.Rectangle((0, 0), 1, 1, fc='#0000A3', edgecolor='none')
         l = plt.legend([bottombar, topbar], ['standard', 'nonstandard'], loc=1, ncol = 2, prop={'size':8})
         l.draw_frame(False)
         sns.despine(left=True)
-        bottom_plot.set_ylabel("total_nums")
-        bottom_plot.set_xlabel("logTime")
-        bottom_plot.set_xticklabels(data.name, rotation=30, fontsize='small')
-        plt.show()
+        bottom_plot.set_ylabel("Ratio")
+        bottom_plot.set_xlabel("")
+        bottom_plot.set_xticklabels(data.name, rotation=20, fontsize='small')
+        plt.ylim(0, 1.1)
+        plt.title("Evaluating Indicator")
+        plt.savefig("stats.png")
 
-        
-    
     def cal_average(self, attrs:list, name):
         total_val = 0
         total = len(self.person_dict)
@@ -464,8 +466,8 @@ class STATISTICS:
         self.meet = meet
         self.avarage = avarage
 
-    def draw(self):
-        pass
+    def result(self):
+        return [self.name, 1-self.meet/self.effective, self.meet/self.effective]
     
     def __repr__(self):
         message = "name, total, effective"
