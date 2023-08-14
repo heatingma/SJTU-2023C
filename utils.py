@@ -273,15 +273,19 @@ class Person:
         self.cal_guideline()
         
     def cal_guideline(self):
-        self.balanced_diet = self.foods_info.balanced_diet
-        self.food_diversity = self.foods_info.food_diversity
-        self.healthy_weight = self.body_info.healthy_weight
-        self.healthy_exercise = self.activity_info.healthy_exercise
+        self.evaluate_info = EVALUATE()
+        self.evaluate_info.add_evaluate("balanced_diet", 
+                                        self.foods_info.balanced_diet)
+        self.evaluate_info.add_evaluate("food_diversity", 
+                                        self.foods_info.food_diversity)
+        self.evaluate_info.add_evaluate("healthy_weight", 
+                                        self.body_info.healthy_weight)
+        self.evaluate_info.add_evaluate("healthy_exercise", 
+                                        self.activity_info.healthy_exercise)
         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
-        message += "activity_info, health_info, body_info, balanced_diet, "
-        message += "food_diversity, healthy_weight, healthy_exercise"
+        message += "activity_info, health_info, body_info, evaluate_info"
         return f"{self.__class__.__name__}({message})"         
 
 
@@ -298,14 +302,29 @@ class Persons:
         effective = 0
         meet = 0
         for person in self.person_dict.values():
-            if getattr(person, name) is not None:
+            evaluate_info = getattr(person, "evaluate_info")
+            evaluate_dict = getattr(evaluate_info, "evaluate_dict")
+            if evaluate_dict[name] is not None:
                 effective += 1
-                meet += int(getattr(person, name))
+                meet += int(evaluate_dict[name])
         setattr(self, "stat_"+name, STATISTICS(name, total, effective, meet))         
         self.message += (", stat_" + name)
         
     def __repr__(self):
         return f"{self.__class__.__name__}({self.message})" 
+
+
+class EVALUATE:
+    def __init__(self):
+        self.evaluate_dict = dict()
+        self.message = "evaluate_dict: "
+        
+    def add_evaluate(self, name, value):
+        self.evaluate_dict[name] = value
+        self.message += (name + " ")
+        
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.message})"       
 
 
 class STATISTICS:
