@@ -10,6 +10,13 @@ FRUITS_VEGETABLES = ['D22', 'D23', 'D24', 'D25', 'D26', 'D28', 'D29']
 LPFEM = ['D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17']
 BEANS = ['D18', 'D19', 'D20', 'D21']
 OTHERS = ['D30']
+FRESH_VEGETABLES = ['D22']
+FRESH_FRUITS = ['D28']
+DAIRY_PRODUCTS = ['D14','D15','D16']
+CEREAL = ['D5','D6']
+EGG = ['D17']
+AQUATIC_PRODUCTS = ['D13']
+
 
 
 ###################################################################
@@ -141,15 +148,32 @@ class FOODS:
         self.num_lpfem = 0
         self.num_beans = 0
         self.num_others = 0
+        self.num_fresh_vegetables = 0
+        self.num_fresh_fruits = 0
+        self.num_dairy_products = 0
+        self.num_cereal = 0
+        self.num_egg = 0
+        self.num_aquatic_products = 0
         self.count_num(POTATOES, "num_potatoes")
         self.count_num(FRUITS_VEGETABLES, "num_fruits_vegetables")
-        self.count_num(LPFEM, "num_lpfem")
-        self.count_num(BEANS, "num_beans")
-        self.count_num(OTHERS, "num_others")
+        self.count_quantity(LPFEM, "num_lpfem")
+        self.count_quantity(BEANS, "num_beans")
+        self.count_quantity(OTHERS, "num_others")
+        self.count_quantity(FRESH_VEGETABLES, "num_fresh_fruits")
+        self.count_quantity(DAIRY_PRODUCTS, "num_dairy_products")
+        self.count_quantity(CEREAL, "num_cereal")
+        self.count_quantity(EGG, "num_egg")
+        self.count_frequency("day", AQUATIC_PRODUCTS, "num_aquatic_products")
         self.balanced_diet = True if (self.num_potatoes>=1) and (self.num_fruits_vegetables>=1) and \
             (self.num_lpfem>=1) and (self.num_beans>=1) else False
         self.food_diversity = True if (self.num_day_foods >= 12) and (self.num_week_foods >= 25) else False
-
+        self.fresh_vegetables = True if (self.num_fresh_vegetables >= 6) else False
+        self.fresh_fruits = True if (self.num_fresh_fruits >= 4) and (self.num_fresh_fruits <= 7) else False
+        self.dairy_products = True if (self.num_dairy_products >= 4) and (self.num_dairy_products <= 10) else False
+        self.cereal = True if (self.num_cereal >= 3) else False
+        self.lpfem = True if (self.num_lpfem >= 2.4) and (self.num_lpfem <= 4 )else False
+        self.egg = True if (self.num_egg >= 1) and (self.num_egg <=2) else False
+        self.aquatic_products = True if (self.num_aquatic_products >= 1) and (self.num_aquatic_products <= 3) else False
     def count_num(self, type=POTATOES, count="num_potatoes"):
         counter = 0
         for attr in type:
@@ -168,11 +192,39 @@ class FOODS:
                 counter += food.per_month / 30 
         setattr(self, count, counter)
 
+    def count_quantity(self, type=POTATOES, count="num_potatoes"):
+        quantity = 0
+        for attr in type:
+            food = getattr(self, attr)
+            if food.eat == 1 and food.consume != None:
+                if food.per_day:
+                    quantity += food.consume * food.per_day
+                elif food.per_week:
+                    quantity += food.consume * food.per_week / 7
+                elif food.per_month:
+                    quantity += food.consume * food.per_month / 30
+        setattr(self, count, quantity)
+
+    def count_frequency(self, frequent = "day", type=POTATOES, count="frequency_potatoes"):
+        counter = 0
+        for attr in type:
+            food = getattr(self, attr)
+            if frequent == "day":
+                counter = food.per_day
+                count += "_by_day"
+            elif frequent == "week":
+                counter = food.per_week
+                count += "_by_week"
+            elif frequent == "month":
+                counter = food.per_month
+                count += "_by_month"
+        setattr(self, count, counter)
+
                                                     
     def __repr__(self):
         message = "D4 to D30, num_day_foods, num_week_foods, num_potatoes, "
         message += "num_fruits_vegetables, num_lpfem, num_beans, num_others, "
-        message += "balanced_diet, food_diversity"
+        message += "balanced_diet, food_diversity, fresh_vegetables, fresh_fruits, dairy_products, cereal, lpfem, egg, aquatic_products"
         return f"{self.__class__.__name__}({message})"    
     
     
@@ -273,19 +325,23 @@ class Person:
         self.cal_guideline()
         
     def cal_guideline(self):
-        self.evaluate_info = EVALUATE()
-        self.evaluate_info.add_evaluate("balanced_diet", 
-                                        self.foods_info.balanced_diet)
-        self.evaluate_info.add_evaluate("food_diversity", 
-                                        self.foods_info.food_diversity)
-        self.evaluate_info.add_evaluate("healthy_weight", 
-                                        self.body_info.healthy_weight)
-        self.evaluate_info.add_evaluate("healthy_exercise", 
-                                        self.activity_info.healthy_exercise)
+        self.balanced_diet = self.foods_info.balanced_diet
+        self.food_diversity = self.foods_info.food_diversity
+        self.fresh_vegetables = self.foods_info.fresh_vegetables
+        self.fresh_fruits = self.foods_info.fresh_fruits
+        self.dairy_products = self.foods_info.dairy_products
+        self.cereal = self.foods_info.cereal
+        self.lpfem = self.foods_info.lpfem
+        self.egg = self.foods_info.egg
+        self.aquatic_products = self.foods_info.aquatic_products
+        self.healthy_weight = self.body_info.healthy_weight
+        self.healthy_exercise = self.activity_info.healthy_exercise
         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
-        message += "activity_info, health_info, body_info, evaluate_info"
+        message += "activity_info, health_info, body_info, balanced_diet, "
+        message += "fresh_vegetables, fresh_fruits, dairy_products, cereal, lpfem, egg, aquatic_products, "
+        message += "food_diversity, healthy_weight, healthy_exercise"
         return f"{self.__class__.__name__}({message})"         
 
 
