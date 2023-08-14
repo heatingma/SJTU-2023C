@@ -273,15 +273,18 @@ class Person:
         self.cal_guideline()
         
     def cal_guideline(self):
+        def cal_guideline(self):
         self.evaluate_info = EVALUATE()
-        self.evaluate_info.add_evaluate("balanced_diet", 
-                                        self.foods_info.balanced_diet)
-        self.evaluate_info.add_evaluate("food_diversity", 
-                                        self.foods_info.food_diversity)
-        self.evaluate_info.add_evaluate("healthy_weight", 
-                                        self.body_info.healthy_weight)
-        self.evaluate_info.add_evaluate("healthy_exercise", 
-                                        self.activity_info.healthy_exercise)
+        self.evaluate_info.add_evaluate("balanced_diet", self.foods_info.balanced_diet)
+        self.evaluate_info.add_evaluate("food_diversity", self.foods_info.food_diversity)
+        self.evaluate_info.add_evaluate("fresh_vegetables", self.foods_info.fresh_vegetables)
+        self.evaluate_info.add_evaluate("fresh_fruits", self.foods_info.fresh_fruits)
+        self.evaluate_info.add_evaluate("dairy_products", self.foods_info.dairy_products)
+        self.evaluate_info.add_evaluate("cereal", self.foods_info.cereal)
+        self.evaluate_info.add_evaluate("lpfem", self.foods_info.lpfem)
+        self.evaluate_info.add_evaluate("aquatic_products", self.aquatic_products)
+        self.evaluate_info.add_evaluate("healthy_weight", self.aquatic_products)
+        self.evaluate_info.add_evaluate("healthy_exercise", self.aquatic_products)
         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
