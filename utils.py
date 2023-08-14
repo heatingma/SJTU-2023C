@@ -379,13 +379,16 @@ class Persons:
     
     def statistics(self):
         attrs = self.person_dict[10001].evaluate_info.evaluate_dict.keys()
-        self.stats = list()
+        self.stats_ratio = list()
+        self.stats_info = list()
         for attr in attrs:
             self._statistics(attr)
-            self.stats.append(getattr(self, "meet_"+attr).result())
-        self.stats = np.array(self.stats)
-        self.stats = self.stats[np.argsort(-self.stats[:, 2].astype(float))]
-        return self.stats
+            self.stats_ratio.append(getattr(self, "meet_"+attr).get_ratio())
+            self.stats_info.append(getattr(self, "meet_"+attr).get_info())
+        self.stats_ratio = np.array(self.stats_ratio)
+        self.stats_info = np.array(self.stats_info)
+        self.stats_ratio = self.stats_ratio[np.argsort(-self.stats_ratio[:, 2].astype(float))]
+        self.stats_info = self.stats_info[np.argsort(-self.stats_info[:, 3].astype(int))]
             
     def _statistics(self, name="balanced_diet"):
         total = len(self.person_dict)
@@ -403,7 +406,7 @@ class Persons:
     def draw(self):
         plt.rcParams.update({'font.size': 12})
         plt.figure(figsize=(14, 10))
-        data = pd.DataFrame(self.stats[:, 1:].astype(float), index=self.stats[:, 0], columns=['False', 'True'])
+        data = pd.DataFrame(self.stats_ratio[:, 1:].astype(float), index=self.stats_ratio[:, 0], columns=['False', 'True'])
         data['name'] = data.index
         bottom_plot = sns.barplot(x='name', y='True', data=data, color="#0000A3")
         sns.barplot(x='name', y='False', data=data, color="#FF0000", bottom=data['True'])
@@ -417,7 +420,7 @@ class Persons:
         bottom_plot.set_xticklabels(data.name, rotation=20, fontsize='small')
         plt.ylim(0, 1.1)
         plt.title("Evaluating Indicator")
-        plt.savefig("stats.png")
+        plt.savefig("pics/stats.png")
 
     def cal_average(self, attrs:list, name):
         total_val = 0
@@ -466,7 +469,10 @@ class STATISTICS:
         self.meet = meet
         self.avarage = avarage
 
-    def result(self):
+    def get_info(self):
+        return [self.name, self.total, self.effective, self.meet]
+    
+    def get_ratio(self):
         return [self.name, 1-self.meet/self.effective, self.meet/self.effective]
     
     def __repr__(self):
@@ -508,4 +514,5 @@ def get_data(filename="data/processed_data.npy"):
     persons = Persons()
     for person_data in data:
         persons.add_person(Person(person_data))
+    persons.statistics()
     return persons
