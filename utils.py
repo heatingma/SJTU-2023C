@@ -331,7 +331,6 @@ class Person:
         self.cal_guideline()
         
     def cal_guideline(self):
-        def cal_guideline(self):
         self.evaluate_info = EVALUATE()
         self.evaluate_info.add_evaluate("balanced_diet", self.foods_info.balanced_diet)
         self.evaluate_info.add_evaluate("food_diversity", self.foods_info.food_diversity)
