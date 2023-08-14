@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
+import matplotlib as mpl
+import seaborn as sns
 
 ###################################################################
 #                          Food Category                          #
@@ -10,6 +13,7 @@ FRUITS_VEGETABLES = ['D22', 'D23', 'D24', 'D25', 'D26', 'D28', 'D29']
 LPFEM = ['D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17']
 BEANS = ['D18', 'D19', 'D20', 'D21']
 OTHERS = ['D30']
+
 FRESH_VEGETABLES = ['D22']
 FRESH_FRUITS = ['D28']
 DAIRY_PRODUCTS = ['D14','D15','D16']
@@ -17,6 +21,11 @@ CEREAL = ['D5','D6']
 EGG = ['D17']
 AQUATIC_PRODUCTS = ['D13']
 
+HIGH_BAIJIU = 0.50
+LOW_BAIJIU = 0.40
+BEER = 0.04
+GRAPE = 0.10
+YELLOW_WINE = 0.15
 
 
 ###################################################################
@@ -55,32 +64,57 @@ class SMOKE:
         return f"{self.__class__.__name__}({message})"      
 
 
+class WINE:
+    def __init__(self, drink, num_per_week, drink_volume):
+        self.drink = drink
+        self.num_per_week = num_per_week
+        self.drink_volume = drink_volume
+        
+    def get_alcohol_gram(self, degree):
+        if self.num_per_week and self.drink_volume:
+            return self.num_per_week * self.drink_volume * 50 * 0.8 * degree / 7 
+        else:
+            return 0 if self.drink == 2 else None
+            
+    def __repr__(self):
+        message = "drink, num_per_week, drink_volume"
+        return f"{self.__class__.__name__}({message})" 
+
+
 class DRINK:
-    def __init__(self, drink, drink_years, high_baijiu_info, low_baijiu_info, 
-                 beer_info, yellow_wine_info, wine_info):
+    def __init__(self, drink, drink_years: WINE, high_baijiu_info: WINE, low_baijiu_info: WINE, 
+                 beer_info: WINE, yellow_info: WINE, grape_info: WINE):
         self.drink = drink
         self.drink_years = drink_years
         self.high_baijiu_info = high_baijiu_info
         self.low_baijiu_info = low_baijiu_info
         self.beer_info = beer_info
-        self.yellow_wine_info = yellow_wine_info
-        self.wine_info = wine_info
+        self.yellow_info = yellow_info
+        self.grape_info = grape_info
+        self.data_process()
         
+    def data_process(self):
+        if self.drink == 2:
+            self.drink_gram = 0
+            self.light_wine = True
+        else:
+            self.high_baijiu_gram = self.high_baijiu_info.get_alcohol_gram(HIGH_BAIJIU)
+            self.low_baijiu_gram = self.low_baijiu_info.get_alcohol_gram(LOW_BAIJIU)
+            self.beer_gram = self.beer_info.get_alcohol_gram(BEER)
+            self.yellow_gram = self.yellow_info.get_alcohol_gram(YELLOW_WINE)
+            self.grape_gram = self.grape_info.get_alcohol_gram(GRAPE)
+            if self.high_baijiu_gram is None or self.low_baijiu_gram is None or \
+                self.beer_gram is None or self.yellow_gram is None or self.grape_gram is None:
+                    self.light_wine = None
+            else:
+                self.drink_gram = self.high_baijiu_gram + self.low_baijiu_gram + \
+                    self.beer_gram + self.yellow_gram + self.grape_gram
+                self.light_wine = True if self.drink_gram < 15 else False
+            
     def __repr__(self):
-        message = "drink, drink_years, high_baijiu_info, low_baijiu_info, "  
-        message += "beer_info, yellow_wine_info, wine_info"
-        return f"{self.__class__.__name__}({message})"            
-    
-    
-class WINE:
-    def __init__(self, drink, drink_days_per_week, drink_volume):
-        self.drink = drink
-        self.drink_days_per_week = drink_days_per_week
-        self.drink_volume = drink_volume
-        
-    def __repr__(self):
-        message = "drink, drink_days_per_week, drink_volume"
-        return f"{self.__class__.__name__}({message})" 
+        message = "drink, drink_years, drink_gram, high_baijiu_info, low_baijiu_info, "  
+        message += "beer_info, yellow_info, grape_info, light_wine"
+        return f"{self.__class__.__name__}({message})"  
 
 
 class MEALS:
@@ -143,44 +177,38 @@ class FOODS:
     def data_process(self):
         self.num_day_foods = 0
         self.num_week_foods = 0
-        self.num_potatoes = 0
-        self.num_fruits_vegetables = 0
-        self.num_lpfem = 0
-        self.num_beans = 0
-        self.num_others = 0
-        self.quantity_lpfem = 0
-        self.quantity_beans = 0
-        self.quantity_others = 0
-        self.quantity_fresh_vegetables = 0
-        self.quantity_fresh_fruits = 0
-        self.quantity_dairy_products = 0
-        self.quantity_cereal = 0
-        self.quantity_egg = 0
-        self.frequency_aquatic_products = 0
-        self.count_num(POTATOES, "num_potatoes")
-        self.count_num(FRUITS_VEGETABLES, "num_fruits_vegetables")
-        self.count_num(LPFEM, "num_lpfem")
-        self.count_num(BEANS, "num_beans")
-        self.count_num(OTHERS, "num_others")
-        self.count_quantity(LPFEM, "quantity_lpfem")
-        self.count_quantity(BEANS, "quantity_beans")
-        self.count_quantity(OTHERS, "quantity_others")
-        self.count_quantity(FRESH_VEGETABLES, "quantity_fresh_fruits")
-        self.count_quantity(DAIRY_PRODUCTS, "quantity_dairy_products")
-        self.count_quantity(CEREAL, "quantity_cereal")
-        self.count_quantity(EGG, "quantity_egg")
-        self.count_frequency("day", AQUATIC_PRODUCTS, "frequency_aquatic_products")
-        self.balanced_diet = True if (self.num_potatoes>=1) and (self.num_fruits_vegetables>=1) and \
-            (self.num_lpfem>=1) and (self.num_beans>=1) else False
-        self.food_diversity = True if (self.num_day_foods >= 12) and (self.num_week_foods >= 25) else False
+        self.count_num([(POTATOES, "num_potatoes"), (LPFEM, "num_lpfem"),
+                        (FRUITS_VEGETABLES, "num_fruits_vegetables"),
+                        (BEANS, "num_beans"), (OTHERS, "num_others"),(AQUATIC_PRODUCTS,"frequency_aquatic_products")])
+        self.count_quantity([(LPFEM, "quantity_lpfem"), (BEANS, "quantity_beans"),
+                             (FRESH_VEGETABLES, "quantity_fresh_vegetables"),
+                             (FRESH_FRUITS, "quantity_fresh_fruits"),
+                             (DAIRY_PRODUCTS, "quantity_dairy_products"),
+                             (CEREAL, "quantity_cereal"), (EGG, "quantity_egg")])
+        self.balanced_diet = True if (self.num_potatoes>=1) and \
+            (self.num_fruits_vegetables>=1) and (self.num_lpfem>=1) \
+            and (self.num_beans>=1) else False
+        self.food_diversity = True if (self.num_day_foods >= 12) and \
+            (self.num_week_foods >= 25) else False
         self.fresh_vegetables = True if (self.quantity_fresh_vegetables >= 6) else False
-        self.fresh_fruits = True if (self.quantity_fresh_fruits >= 4) and (self.quantity_fresh_fruits <= 7) else False
-        self.dairy_products = True if (self.quantity_dairy_products >= 4) and (self.quantity_dairy_products <= 10) else False
+        self.fresh_fruits = True if (self.quantity_fresh_fruits >= 4) and \
+            (self.quantity_fresh_fruits <= 7) else False
+        self.dairy_products = True if (self.quantity_dairy_products >= 4) and \
+            (self.quantity_dairy_products <= 10) else False
         self.cereal = True if (self.quantity_cereal >= 3) else False
-        self.lpfem = True if (self.quantity_lpfem >= 2.4) and (self.quantity_lpfem <= 4 )else False
+        self.lpfem = True if (self.quantity_lpfem >= 2.4) and (self.quantity_lpfem <= 4) else False
         self.egg = True if (self.quantity_egg >= 1) and (self.quantity_egg <=2) else False
-        self.aquatic_products = True if (self.frequency_aquatic_products >= 1) and (self.frequency_aquatic_products <= 3) else False
-    def count_num(self, type=POTATOES, count="num_potatoes"):
+        self.aquatic_products = True if (self.frequency_aquatic_products * 7 >= 1) and (self.frequency_aquatic_products * 7 <= 3) else False
+        if self.D33 is None:
+            self.light_salt = None
+        else:
+            self.light_salt = True if (self.D33 * 50 / 30 < 5) else False
+    
+    def count_num(self, count_list:list):
+        for count_item in count_list:
+            self._count_num(count_item[0], count_item[1])
+            
+    def _count_num(self, type, count):
         counter = 0
         for attr in type:
             food = getattr(self, attr)
@@ -197,8 +225,12 @@ class FOODS:
                 self.num_week_foods += food.per_month / 4
                 counter += food.per_month / 30 
         setattr(self, count, counter)
-
-    def count_quantity(self, type=POTATOES, count="quantity_potatoes"):
+    
+    def count_quantity(self, count_list:list):
+        for count_item in count_list:
+            self._count_quantity(count_item[0], count_item[1])
+            
+    def _count_quantity(self, type, count):
         quantity = 0
         for attr in type:
             food = getattr(self, attr)
@@ -210,27 +242,13 @@ class FOODS:
                 elif food.per_month:
                     quantity += food.consume * food.per_month / 30
         setattr(self, count, quantity)
-
-    def count_frequency(self, frequent = "day", type=POTATOES, count="frequency_potatoes"):
-        counter = 0
-        for attr in type:
-            food = getattr(self, attr)
-            if frequent == "day":
-                counter = food.per_day
-                count += "_by_day"
-            elif frequent == "week":
-                counter = food.per_week
-                count += "_by_week"
-            elif frequent == "month":
-                counter = food.per_month
-                count += "_by_month"
-        setattr(self, count, counter)
-
+    
                                                     
     def __repr__(self):
         message = "D4 to D30, num_day_foods, num_week_foods, num_potatoes, "
         message += "num_fruits_vegetables, num_lpfem, num_beans, num_others, "
-        message += "balanced_diet, food_diversity, fresh_vegetables, fresh_fruits, dairy_products, cereal, lpfem, egg, aquatic_products"
+        message += "balanced_diet, food_diversity, fresh_vegetables, fresh_fruits, "
+        message += "dairy_products, cereal, lpfem, egg, aquatic_products"
         return f"{self.__class__.__name__}({message})"    
     
     
@@ -332,17 +350,19 @@ class Person:
         
     def cal_guideline(self):
         self.evaluate_info = EVALUATE()
-        self.evaluate_info.add_evaluate("balanced_diet", self.foods_info.balanced_diet)
-        self.evaluate_info.add_evaluate("food_diversity", self.foods_info.food_diversity)
-        self.evaluate_info.add_evaluate("fresh_vegetables", self.foods_info.fresh_vegetables)
-        self.evaluate_info.add_evaluate("fresh_fruits", self.foods_info.fresh_fruits)
-        self.evaluate_info.add_evaluate("dairy_products", self.foods_info.dairy_products)
-        self.evaluate_info.add_evaluate("cereal", self.foods_info.cereal)
-        self.evaluate_info.add_evaluate("lpfem", self.foods_info.lpfem)
-        self.evaluate_info.add_evaluate("aquatic_products", self.aquatic_products)
-        self.evaluate_info.add_evaluate("healthy_weight", self.aquatic_products)
-        self.evaluate_info.add_evaluate("healthy_exercise", self.aquatic_products)
-        
+        self.evaluate_info.add_evaluate(
+            [("balanced_diet", self.foods_info.balanced_diet),
+             ("food_diversity", self.foods_info.food_diversity),
+             ("fresh_vegetables", self.foods_info.fresh_vegetables),
+             ("fresh_fruits", self.foods_info.fresh_fruits),
+             ("dairy_products", self.foods_info.dairy_products),
+             ("cereal", self.foods_info.cereal),
+             ("lpfem", self.foods_info.lpfem),
+             ("healthy_weight", self.body_info.healthy_weight),
+             ("healthy_exercise", self.activity_info.healthy_exercise),
+             ("light_salt", self.foods_info.light_salt),
+             ("light_wine", self.drink_info.light_wine)])
+                
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
         message += "activity_info, health_info, body_info, evaluate_info"
@@ -369,6 +389,33 @@ class Persons:
                 meet += int(evaluate_dict[name])
         setattr(self, "stat_"+name, STATISTICS(name, total, effective, meet))         
         self.message += (", stat_" + name)
+
+    def get_dataframe(self):
+        person_data = pd.DataFrame()
+
+        for person in self.person_dict.values():
+            person_data = person_data.append(person.evaluate_info.evaluate_dict, ignore_index = True)
+        print(person_data)
+        return person_data
+    
+    def draw(self):
+        Data = self.get_dataframe()
+        counts = Data.apply(pd.value_counts).fillna(0)
+        data = counts.T
+        data['name'] = data.index
+        sns.barplot(x = 'name', y = 0, data = data, color="red")
+        bottom_plot = sns.barplot(x = 'name', y = 1, data=data, color = "#0000A3")
+        topbar = plt.Rectangle((0,0),1,1,fc="red", edgecolor = 'none')
+        bottombar = plt.Rectangle((0,0),1,1,fc='#0000A3',  edgecolor = 'none')
+        l = plt.legend([bottombar, topbar], ['standard', 'nonstandard'], loc=1, ncol = 2, prop={'size':8})
+        l.draw_frame(False)
+        sns.despine(left=True)
+        bottom_plot.set_ylabel("total_nums")
+        bottom_plot.set_xlabel("logTime")
+        bottom_plot.set_xticklabels(data.name, rotation=30, fontsize='small')
+        plt.show()
+
+        
         
     def __repr__(self):
         return f"{self.__class__.__name__}({self.message})" 
@@ -377,14 +424,17 @@ class Persons:
 class EVALUATE:
     def __init__(self):
         self.evaluate_dict = dict()
-        self.message = "evaluate_dict: "
-        
-    def add_evaluate(self, name, value):
+    
+    def add_evaluate(self, add_list:list):
+        for add_item in add_list:
+            self._add_evaluate(add_item[0], add_item[1])
+            
+    def _add_evaluate(self, name, value):
         self.evaluate_dict[name] = value
-        self.message += (name + " ")
         
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.message})"       
+        message = "evaluate_dict"
+        return f"{self.__class__.__name__}({message})"       
 
 
 class STATISTICS:
