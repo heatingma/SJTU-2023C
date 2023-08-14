@@ -149,7 +149,7 @@ class FOODS:
         self.balanced_diet = True if (self.num_potatoes>=1) and (self.num_fruits_vegetables>=1) and \
             (self.num_lpfem>=1) and (self.num_beans>=1) else False
         self.food_diversity = True if (self.num_day_foods >= 12) and (self.num_week_foods >= 25) else False
-        
+
     def count_num(self, type=POTATOES, count="num_potatoes"):
         counter = 0
         for attr in type:
@@ -315,6 +315,9 @@ class STATISTICS:
         self.effective = effective
         self.meet = meet
 
+    def draw(self):
+        pass
+    
     def __repr__(self):
         message = "name, total, effective, meet" 
         return f"{self.__class__.__name__}({message})" 
