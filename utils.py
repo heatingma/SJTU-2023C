@@ -403,7 +403,8 @@ class Persons:
         counts = Data.apply(pd.value_counts).fillna(0)
         data = counts.T
         data['name'] = data.index
-        sns.barplot(x = 'name', y = 0, data = data, color="red")
+        data[2] = data[0] + data[1]
+        sns.barplot(x = 'name', y = 2, data = data, color="red")
         bottom_plot = sns.barplot(x = 'name', y = 1, data=data, color = "#0000A3")
         topbar = plt.Rectangle((0,0),1,1,fc="red", edgecolor = 'none')
         bottombar = plt.Rectangle((0,0),1,1,fc='#0000A3',  edgecolor = 'none')
