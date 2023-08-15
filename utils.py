@@ -424,7 +424,7 @@ class Persons:
         person_data = pd.DataFrame()
         for person in self.person_dict.values():
             person_data = person_data._append(person.evaluate_info.draw_dict, ignore_index = True)
-        person_data.to_csv("data/metrics.csv")
+        person_data.to_csv("docs/metrics.csv")
         
     def draw_ratio(self):
         plt.rcParams.update({'font.size': 12})
