@@ -5,7 +5,7 @@ import matplotlib as mpl
 import seaborn as sns
 
 ###################################################################
-#                          Food Category                          #
+#                  Constant Variable Assumption                   #
 ###################################################################
 
 POTATOES = ['D4', 'D5', 'D6', 'D7', 'D8', 'D27']
@@ -42,6 +42,7 @@ class BASIC:
         self.edu = edu
         self.married = married
         self.career = career
+        self.age = 2023-self.birth
         
     def __repr__(self):
         message = "id, birth, sex, nation, nation_name, edu, married, career"
@@ -181,25 +182,26 @@ class FOODS:
         self.count_num([(POTATOES, "num_potatoes"), (LPFEM, "num_lpfem"),
                         (FRUITS_VEGETABLES, "num_fruits_vegetables"),
                          (BEANS, "num_beans"), (AQUATIC_PRODUCTS,"frequency_aquatic_products")])
-        self.count_quantity([(LPFEM, "quantity_lpfem"), (BEANS, "quantity_beans"),
-                             (FRESH_VEGETABLES, "quantity_fresh_vegetables"),
-                             (FRESH_FRUITS, "quantity_fresh_fruits"),
-                             (DAIRY_PRODUCTS, "quantity_dairy_products"),
-                             (CEREAL, "quantity_cereal"), (EGG, "quantity_egg"),
-                             (BEVERAGE, "quantity_beverage")])
+        self.count_qty([(LPFEM, "qty_lpfem"), (BEANS, "qty_beans"),
+                             (FRESH_VEGETABLES, "qty_fresh_vegetables"),
+                             (FRESH_FRUITS, "qty_fresh_fruits"),
+                             (DAIRY_PRODUCTS, "qty_dairy_products"),
+                             (CEREAL, "qty_cereal"), (EGG, "qty_egg"),
+                             (BEVERAGE, "qty_beverage")])
         self.balanced_diet = True if (self.num_potatoes>=1) and \
             (self.num_fruits_vegetables>=1) and (self.num_lpfem>=1) \
             and (self.num_beans>=1) else False
         self.food_diversity = True if (self.num_day_foods >= 12) and \
             (self.num_week_foods >= 25) else False
-        self.fresh_vegetables = True if (self.quantity_fresh_vegetables >= 6) else False
-        self.fresh_fruits = True if (self.quantity_fresh_fruits >= 4) and \
-            (self.quantity_fresh_fruits <= 7) else False
-        self.dairy_products = True if (self.quantity_dairy_products >= 4) and \
-            (self.quantity_dairy_products <= 10) else False
-        self.cereal = True if (self.quantity_cereal >= 3) else False
-        self.lpfem = True if (self.quantity_lpfem >= 2.4) and (self.quantity_lpfem <= 4) else False
-        self.egg = True if (self.quantity_egg >= 1) and (self.quantity_egg <=2) else False
+        self.fresh_vegetables = True if (self.qty_fresh_vegetables >= 6) else False
+        self.fresh_fruits = True if (self.qty_fresh_fruits >= 4) and \
+            (self.qty_fresh_fruits <= 7) else False
+        self.dairy_products = True if (self.qty_dairy_products >= 4) and \
+            (self.qty_dairy_products <= 10) else False
+        self.cereal = True if (self.qty_cereal <= 3) and \
+            (self.qty_cereal >= 1) else False
+        self.lpfem = True if (self.qty_lpfem >= 2.4) and (self.qty_lpfem <= 4) else False
+        self.egg = True if (self.qty_egg >= 1) and (self.qty_egg <=2) else False
         self.aquatic_products = True if (self.frequency_aquatic_products * 7 >= 1) and (self.frequency_aquatic_products * 7 <= 3) else False
         if self.D33 is None:
             self.light_salt = None
@@ -228,22 +230,22 @@ class FOODS:
                 counter += food.per_month / 30 
         setattr(self, count, counter)
     
-    def count_quantity(self, count_list:list):
+    def count_qty(self, count_list:list):
         for count_item in count_list:
-            self._count_quantity(count_item[0], count_item[1])
+            self._count_qty(count_item[0], count_item[1])
             
-    def _count_quantity(self, type, count):
-        quantity = 0
+    def _count_qty(self, type, count):
+        qty = 0
         for attr in type:
             food = getattr(self, attr)
             if food.eat == 1 and food.consume != None:
                 if food.per_day:
-                    quantity += food.consume * food.per_day
+                    qty += food.consume * food.per_day
                 elif food.per_week:
-                    quantity += food.consume * food.per_week / 7
+                    qty += food.consume * food.per_week / 7
                 elif food.per_month:
-                    quantity += food.consume * food.per_month / 30
-        setattr(self, count, quantity)
+                    qty += food.consume * food.per_month / 30
+        setattr(self, count, qty)
                                                     
     def __repr__(self):
         message = "D4 to D30, num_day_foods, num_week_foods, num_potatoes, "
@@ -364,35 +366,23 @@ class Person:
              ("light_salt", self.foods_info.light_salt),
              ("light_wine", self.drink_info.light_wine)])
         
-        self.evaluate_info.add_draw(
-            [("food_diversity", self.foods_info.num_day_foods),
-             ("fresh_vegetables", self.foods_info.quantity_fresh_vegetables),
-             ("fresh_fruits", self.foods_info.quantity_fresh_fruits),
-             ("dairy_products", self.foods_info.quantity_dairy_products),
-             ("cereal", self.foods_info.quantity_cereal),
-             ("lpfem", self.foods_info.quantity_lpfem),
-             ("healthy_weight", self.body_info.BMI),
-             ("healthy_exercise", self.activity_info.seconds_per_day),
-             ("light_salt", self.foods_info.D33),
-             ("light_wine", self.drink_info.drink_gram),
-             ("beverage_quantity", self.foods_info.quantity_beverage)])
-        
-        self.evaluate_info.add_2(
-            [("food_diversity", self.foods_info.num_day_foods),
-             ("fresh_vegetables", self.foods_info.quantity_fresh_vegetables),
-             ("fresh_fruits", self.foods_info.quantity_fresh_fruits),
-             ("dairy_products", self.foods_info.quantity_dairy_products),
-             ("cereal", self.foods_info.quantity_cereal),
-             ("lpfem", self.foods_info.quantity_lpfem),
-             ("birth", self.basic_info.birth),
+        self.evaluate_info.add_qty(    
+            [("num_day_foods", self.foods_info.num_day_foods),
+             ("qty_f_veg", self.foods_info.qty_fresh_vegetables),
+             ("qty_f_fruits", self.foods_info.qty_fresh_fruits),
+             ("qty_d_prods", self.foods_info.qty_dairy_products),
+             ("qty_cereal", self.foods_info.qty_cereal),
+             ("qty_lpfem", self.foods_info.qty_lpfem),
+             ("BMI", self.body_info.BMI),
+             ("exe_seconds", self.activity_info.seconds_per_day),
+             ("salt", self.foods_info.D33),
+             ("wine", self.drink_info.drink_gram),
+             ("qty_beverage", self.foods_info.qty_beverage),
+             ("age", self.basic_info.age),
              ("sex", self.basic_info.sex),
              ("married", self.basic_info.married),
              ("career", self.basic_info.career),
-             ("edu", self.basic_info.edu),
-             ("healthy_exercise", self.activity_info.seconds_per_day),
-             ("light_salt", self.foods_info.D33),
-             ("light_wine", self.drink_info.drink_gram),
-             ("beverage_quantity", self.foods_info.quantity_beverage)])
+             ("edu", self.basic_info.edu)])
                         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
@@ -410,16 +400,16 @@ class Persons:
     
     def statistics(self):
         attrs = self.person_dict[10001].evaluate_info.evaluate_dict.keys()
-        self.stats_ratio = list()
-        self.stats_info = list()
+        self.evaluate_ratio = list()
+        self.evaluate_info = list()
         for attr in attrs:
             self._statistics(attr)
-            self.stats_ratio.append(getattr(self, attr).get_ratio())
-            self.stats_info.append(getattr(self, attr).get_info())
-        self.stats_ratio = np.array(self.stats_ratio)
-        self.stats_info = np.array(self.stats_info)
-        self.stats_ratio = self.stats_ratio[np.argsort(-self.stats_ratio[:, 2].astype(float))]
-        self.stats_info = self.stats_info[np.argsort(-self.stats_info[:, 3].astype(int))]
+            self.evaluate_ratio.append(getattr(self, attr).get_ratio())
+            self.evaluate_info.append(getattr(self, attr).get_info())
+        self.evaluate_ratio = np.array(self.evaluate_ratio)
+        self.evaluate_info = np.array(self.evaluate_info)
+        self.evaluate_ratio = self.evaluate_ratio[np.argsort(-self.evaluate_ratio[:, 2].astype(float))]
+        self.evaluate_info = self.evaluate_info[np.argsort(-self.evaluate_info[:, 3].astype(int))]
             
     def _statistics(self, name="balanced_diet"):
         total = len(self.person_dict)
@@ -437,30 +427,13 @@ class Persons:
         setattr(self, name, STATISTICS(name, data_list, total, effective, meet=meet))         
         self.message += (", " + name)
     
-    def get_dataframe(self, attrs = "draw_dict" ):
+    def get_dataframe(self):
         person_data = pd.DataFrame()
         for person in self.person_dict.values():
-            person_data = person_data.append(getattr(person.evaluate_info,attrs), ignore_index = True)
-        person_data.to_csv("docs/metrics_1.csv")
-        
-    def draw_ratio(self):
-        plt.rcParams.update({'font.size': 12})
-        plt.figure(figsize=(14, 10))
-        data = pd.DataFrame(self.stats_ratio[:, 1:].astype(float), index=self.stats_ratio[:, 0], columns=['False', 'True'])
-        data['name'] = data.index
-        bottom_plot = sns.barplot(x='name', y='True', data=data, color="#0000A3")
-        sns.barplot(x='name', y='False', data=data, color="#FF0000", bottom=data['True'])
-        topbar = plt.Rectangle((0, 0), 1, 1, fc="#FF0000", edgecolor='none')
-        bottombar = plt.Rectangle((0, 0), 1, 1, fc='#0000A3', edgecolor='none')
-        l = plt.legend([bottombar, topbar], ['standard', 'nonstandard'], loc=1, ncol = 2, prop={'size':8})
-        l.draw_frame(False)
-        sns.despine(left=True)
-        bottom_plot.set_ylabel("Ratio")
-        bottom_plot.set_xlabel("")
-        bottom_plot.set_xticklabels(data.name, rotation=20, fontsize='small')
-        plt.ylim(0, 1.1)
-        plt.title("Evaluating Indicator")
-        plt.savefig("pics/stats_ratio.png")
+            append_data = getattr(person.evaluate_info, "evaluate_dict")
+            append_data.update(getattr(person.evaluate_info, "qty_dict"))
+            person_data = person_data._append(append_data, ignore_index = True)
+        person_data.to_csv("docs/processed_data.csv")
 
     def get_line_data(self, attrs:list, name):
         total_val = 0
@@ -491,8 +464,7 @@ class Persons:
 class EVALUATE:
     def __init__(self):
         self.evaluate_dict = dict()
-        self.draw_dict = dict()
-        self.analyze_dict = dict()
+        self.qty_dict = dict()
         
     def add_evaluate(self, add_list:list):
         for add_item in add_list:
@@ -501,22 +473,15 @@ class EVALUATE:
     def _add_evaluate(self, name, value):
         self.evaluate_dict[name] = value
 
-    def add_draw(self, add_list:list):
+    def add_qty(self, add_list:list):
         for add_item in add_list:
-            self._add_draw(add_item[0], add_item[1])
+            self._add_qty(add_item[0], add_item[1])
             
-    def _add_draw(self, name, value):
-        self.draw_dict[name] = value
-
-    def add_2(self, add_list:list):
-        for add_item in add_list:
-            self._add_2(add_item[0], add_item[1])
-            
-    def _add_2(self, name, value):
-        self.analyze_dict[name] = value
-            
+    def _add_qty(self, name, value):
+        self.qty_dict[name] = value
+                    
     def __repr__(self):
-        message = "evaluate_dict, draw_dict"
+        message = "evaluate_dict, qty_dict"
         return f"{self.__class__.__name__}({message})"       
 
 
@@ -545,7 +510,7 @@ class STATISTICS:
 
            
 ###################################################################
-#                     Data-Processed Function                     #
+#                          Utils Function                         #
 ###################################################################
 
 def replace_nan_with_none(arr):
@@ -563,16 +528,45 @@ def replace_nan_with_none(arr):
     return np.array(result)
 
 
-def read_data(filename, save_path="data/processed_data.npy"):
+def read_data(filename, save_path="docs/processed_data.npy"):
     data = np.array(pd.read_excel(filename))
     data = replace_nan_with_none(data[1:])
     np.save(save_path, data)
     
 
-def get_data(filename="data/processed_data.npy"):
+def get_data(filename="docs/processed_data.npy"):
     data = np.load(filename, allow_pickle=True)
     persons = Persons()
     for person_data in data:
         persons.add_person(Person(person_data))
     persons.statistics()
     return persons
+
+
+def draw_ratio(data, tilte="Evaluating Indicator", x_lable="", 
+               y_label="Ratio",fig_name="pics/evaluate_ratio.png"):
+    plt.rcParams.update({'font.size': 12})
+    plt.figure(figsize=(14, 10))
+    data = pd.DataFrame(data[:, 1:].astype(float), index=data[:, 0], columns=['False', 'True'])
+    data['name'] = data.index
+    bottom_plot = sns.barplot(x='name', y='True', data=data, color="#0000A3")
+    sns.barplot(x='name', y='False', data=data, color="#FF0000", bottom=data['True'])
+    topbar = plt.Rectangle((0, 0), 1, 1, fc="#FF0000", edgecolor='none')
+    bottombar = plt.Rectangle((0, 0), 1, 1, fc='#0000A3', edgecolor='none')
+    l = plt.legend([bottombar, topbar], ['standard', 'nonstandard'], loc=1, ncol = 2, prop={'size':8})
+    l.draw_frame(False)
+    sns.despine(left=True)
+    bottom_plot.set_ylabel(y_label)
+    bottom_plot.set_xlabel(x_lable)
+    bottom_plot.set_xticklabels(data.name, rotation=20, fontsize='small')
+    plt.ylim(0, 1.1)
+    plt.title(tilte)
+    plt.savefig(fig_name)
+    
+    
+def draw_histogram(data, x, bins, fig_name, figsize=(14,10), font_size=12, 
+                   stat='probability',color = '#008080', ):
+    sns.set(rc = {'figure.figsize':figsize})
+    plt.rcParams.update({'font.size': font_size})
+    sns.displot(data=data, x=x, bins=bins, stat=stat, color=color)
+    plt.savefig(fig_name)
