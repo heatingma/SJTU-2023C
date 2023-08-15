@@ -376,6 +376,23 @@ class Person:
              ("light_salt", self.foods_info.D33),
              ("light_wine", self.drink_info.drink_gram),
              ("beverage_quantity", self.foods_info.quantity_beverage)])
+        
+        self.evaluate_info.add_2(
+            [("food_diversity", self.foods_info.num_day_foods),
+             ("fresh_vegetables", self.foods_info.quantity_fresh_vegetables),
+             ("fresh_fruits", self.foods_info.quantity_fresh_fruits),
+             ("dairy_products", self.foods_info.quantity_dairy_products),
+             ("cereal", self.foods_info.quantity_cereal),
+             ("lpfem", self.foods_info.quantity_lpfem),
+             ("birth", self.basic_info.birth),
+             ("sex", self.basic_info.sex),
+             ("married", self.basic_info.married),
+             ("career", self.basic_info.career),
+             ("edu", self.basic_info.edu),
+             ("healthy_exercise", self.activity_info.seconds_per_day),
+             ("light_salt", self.foods_info.D33),
+             ("light_wine", self.drink_info.drink_gram),
+             ("beverage_quantity", self.foods_info.quantity_beverage)])
                         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
@@ -420,11 +437,11 @@ class Persons:
         setattr(self, name, STATISTICS(name, data_list, total, effective, meet=meet))         
         self.message += (", " + name)
     
-    def get_dataframe(self):
+    def get_dataframe(self, attrs = "draw_dict" ):
         person_data = pd.DataFrame()
         for person in self.person_dict.values():
-            person_data = person_data._append(person.evaluate_info.draw_dict, ignore_index = True)
-        person_data.to_csv("docs/metrics.csv")
+            person_data = person_data.append(getattr(person.evaluate_info,attrs), ignore_index = True)
+        person_data.to_csv("docs/metrics_1.csv")
         
     def draw_ratio(self):
         plt.rcParams.update({'font.size': 12})
@@ -475,6 +492,7 @@ class EVALUATE:
     def __init__(self):
         self.evaluate_dict = dict()
         self.draw_dict = dict()
+        self.analyze_dict = dict()
         
     def add_evaluate(self, add_list:list):
         for add_item in add_list:
@@ -489,6 +507,13 @@ class EVALUATE:
             
     def _add_draw(self, name, value):
         self.draw_dict[name] = value
+
+    def add_2(self, add_list:list):
+        for add_item in add_list:
+            self._add_2(add_item[0], add_item[1])
+            
+    def _add_2(self, name, value):
+        self.analyze_dict[name] = value
             
     def __repr__(self):
         message = "evaluate_dict, draw_dict"
