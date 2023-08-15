@@ -21,15 +21,15 @@ def problem_1():
     draw_ratio(data.evaluate_ratio)
     # histogram pics
     df = pd.read_csv("docs/processed_data.csv")
-    draw_histogram(df, "quantity_fresh_vegetables", [x for x in range(30)], "pics/fresh_vegtables.png")
+    draw_histogram(df, "qty_f_veg", [x for x in range(30)], "pics/fresh_vegtables.png")
     draw_histogram(df, "num_day_foods", 15, "pics/num_day_foods.png")
-    draw_histogram(df, "quantity_fresh_fruits", [x for x in range(16)], "pics/quantity_fresh_fruits.png")
-    draw_histogram(df, "quantity_dairy_products", [x for x in range(11)], "pics/dairy_products.png")
-    draw_histogram(df, "quantity_cereal", [x for x in range(6)], "pics/quantity_cereal.png")
-    draw_histogram(df, "quantity_lpfem", [x for x in range(25)], "pics/quantity_lpfem.png")
+    draw_histogram(df, "qty_f_fruits", [x for x in range(16)], "pics/quantity_fresh_fruits.png")
+    draw_histogram(df, "qty_d_prods", [x for x in range(11)], "pics/dairy_products.png")
+    draw_histogram(df, "qty_cereal", [x for x in range(6)], "pics/quantity_cereal.png")
+    draw_histogram(df, "qty_lpfem", [x for x in range(25)], "pics/quantity_lpfem.png")
     draw_histogram(df, "salt", [x for x in range(30)], "pics/salt.png")
     draw_histogram(df, "wine", [x for x in range(10)], "pics/wine.png")
-    draw_histogram(df, "quantity_beverage", [x for x in np.arange(0,1.2,0.05)], "pics/quantity_beverage.png")
+    draw_histogram(df, "qty_beverage", [x for x in np.arange(0,1.2,0.05)], "pics/quantity_beverage.png")
 
 
 # PROBLEM-2-CCA
