@@ -27,6 +27,8 @@ BEER = 0.04
 GRAPE = 0.10
 YELLOW_WINE = 0.15
 
+FAMILY_PERSONS = 2.62
+
 
 ###################################################################
 #                        Information Class                        #
@@ -119,17 +121,6 @@ class DRINK:
         return f"{self.__class__.__name__}({message})"  
 
 
-class MEALS:
-    def __init__(self, breakfast, lunch, dinner) -> None:
-        self.breakfast = breakfast
-        self.lunch = lunch
-        self.dinner = dinner
-        
-    def __repr__(self):
-        message = "breakfast, lunch, dinner"
-        return f"{self.__class__.__name__}({message})"         
-    
-    
 class MEAL:
     def __init__(self, no_eat, home, take, canteen, out, 
                  persons_of_weekdays, persons_of_weekends):
@@ -138,14 +129,37 @@ class MEAL:
         self.take = take
         self.canteen = canteen
         self.out = out
-        self.persons_of_weekdays = persons_of_weekdays
-        self.persons_of_weekends = persons_of_weekends
+        self.persons_of_weekdays = None if persons_of_weekdays \
+            is None else persons_of_weekdays
+        self.persons_of_weekends = None if persons_of_weekends \
+            is None else persons_of_weekends
+            
+        self.avg_persons = None if (self.persons_of_weekdays is None or \
+            self.persons_of_weekends is None) else \
+            self.persons_of_weekdays * 5 / 7 + self.persons_of_weekends * 2 / 7
+            
+    def __repr__(self):
+        message = "no_eat, home, take, canteen, out, persons_of_weekdays, "
+        message += "persons_of_weekends, avg_persons"
+        return f"{self.__class__.__name__}({message})"  
+
+
+class MEALS:
+    def __init__(self, breakfast: MEAL, lunch: MEAL, dinner: MEAL) -> None:
+        self.breakfast = breakfast
+        self.lunch = lunch
+        self.dinner = dinner
+        if self.breakfast.avg_persons is None or self.lunch.avg_persons \
+            is None or self.dinner.avg_persons is None:
+            self.meals_avg_persons = FAMILY_PERSONS 
+        else:
+            self.meals_avg_persons = (self.breakfast.avg_persons * 0.2 + \
+            self.lunch.avg_persons * 0.4 + self.dinner.avg_persons * 0.4)
         
     def __repr__(self):
-        message = "no_eat, home, take, canteen, out, "
-        message += "persons_of_weekdays, persons_of_weekends"
-        return f"{self.__class__.__name__}({message})"    
-
+        message = "breakfast, lunch, dinner, meals_avg_persons"
+        return f"{self.__class__.__name__}({message})"         
+    
 
 class ACTIVITY:
     def __init__(self, work, housework, exercise, intensity, seconds_per_day):
@@ -207,7 +221,11 @@ class FOODS:
             self.light_salt = None
         else:
             self.light_salt = True if (self.D33 * 50 / 30 < 5) else False
-    
+        self.D31 = 0 if self.D31 is None else self.D31 * 500 / 30
+        self.D32 = 0 if self.D32 is None else self.D32 * 500 / 30
+        self.qty_oil = None
+        self.healthy_oil = None   
+            
     def count_num(self, count_list:list):
         for count_item in count_list:
             self._count_num(count_item[0], count_item[1])
@@ -250,8 +268,10 @@ class FOODS:
     def __repr__(self):
         message = "D4 to D30, num_day_foods, num_week_foods, num_potatoes, "
         message += "num_fruits_vegetables, num_lpfem, num_beans, num_beverage, "
-        message += "balanced_diet, food_diversity, fresh_vegetables, fresh_fruits, "
-        message += "dairy_products, cereal, lpfem, egg, aquatic_products"
+        message += "balanced_diet, food_diversity, fresh_vegetables, qty_fresh_vegetables, "
+        message += "fresh_fruits, qty_fresh_fruits, dairy_products, qty_dairy_products, "
+        message += "cereal, qty_cereal, lpfem, qty_lpfem, egg, qty_egg, aquatic_products, "
+        message += "frequency_aquatic_products, light_salt, healthy_oil, qty_oil"
         return f"{self.__class__.__name__}({message})"    
     
     
@@ -349,8 +369,21 @@ class Person:
                                             data[i+5], data[i+6]) for i in range(199, 213, 7)], 
                                   *data[213:221])
         self.body_info = BODY(*data[221:234])
+        self.data_process()
         self.cal_guideline()
-        
+    
+    def data_process(self):
+        self.meals_avg_persons = self.meals_info.meals_avg_persons
+        if self.meals_avg_persons != 0:
+            self.foods_info.D31 /= self.meals_avg_persons
+            self.foods_info.D32 /= self.meals_avg_persons
+            self.foods_info.qty_oil = self.foods_info.D31 + self.foods_info.D32
+            self.foods_info.healthy_oil = True if \
+                (self.foods_info.qty_oil >= 25 and self.foods_info.qty_oil <= 30) else False
+        else:
+            self.foods_info.qty_oil = 0
+            self.foods_info.healthy_oil = 0
+                       
     def cal_guideline(self):
         self.evaluate_info = EVALUATE()
         self.evaluate_info.add_evaluate(
@@ -363,6 +396,7 @@ class Person:
              ("lpfem", self.foods_info.lpfem),
              ("healthy_weight", self.body_info.healthy_weight),
              ("healthy_exercise", self.activity_info.healthy_exercise),
+             ("healthy_oil", self.foods_info.healthy_oil),
              ("light_salt", self.foods_info.light_salt),
              ("light_wine", self.drink_info.light_wine)])
         
@@ -373,6 +407,7 @@ class Person:
              ("qty_d_prods", self.foods_info.qty_dairy_products),
              ("qty_cereal", self.foods_info.qty_cereal),
              ("qty_lpfem", self.foods_info.qty_lpfem),
+             ("qty_oil", self.foods_info.qty_oil),
              ("BMI", self.body_info.BMI),
              ("exe_seconds", self.activity_info.seconds_per_day),
              ("salt", self.foods_info.D33),
