@@ -125,7 +125,7 @@ class MEAL:
     def __init__(self, no_eat, home, take, canteen, out, 
                  persons_of_weekdays, persons_of_weekends):
         self.no_eat = no_eat
-        self.home = home
+        self.home = 0 if home is None else home 
         self.take = take
         self.canteen = canteen
         self.out = out
@@ -149,12 +149,18 @@ class MEALS:
         self.breakfast = breakfast
         self.lunch = lunch
         self.dinner = dinner
+        self.data_process()
+        
+    def data_process(self):
         if self.breakfast.avg_persons is None or self.lunch.avg_persons \
             is None or self.dinner.avg_persons is None:
             self.meals_avg_persons = FAMILY_PERSONS 
         else:
             self.meals_avg_persons = (self.breakfast.avg_persons * 0.2 + \
             self.lunch.avg_persons * 0.4 + self.dinner.avg_persons * 0.4)
+        self.radio_at_home = (self.breakfast.home + self.lunch.home + 
+                              self.dinner.home) / 21
+        self.healthy_cooking = True if self.radio_at_home >= 0.5 else False
         
     def __repr__(self):
         message = "breakfast, lunch, dinner, meals_avg_persons"
@@ -202,6 +208,7 @@ class FOODS:
                              (DAIRY_PRODUCTS, "qty_dairy_products"),
                              (CEREAL, "qty_cereal"), (EGG, "qty_egg"),
                              (BEVERAGE, "qty_beverage")])
+        self._count_qty(BEANS, "qty_beans", weight=[0.25, 0.625, 0.068, 1])
         self.balanced_diet = True if (self.num_potatoes>=1) and \
             (self.num_fruits_vegetables>=1) and (self.num_lpfem>=1) \
             and (self.num_beans>=1) else False
@@ -216,15 +223,19 @@ class FOODS:
             (self.qty_cereal >= 1) else False
         self.lpfem = True if (self.qty_lpfem >= 2.4) and (self.qty_lpfem <= 4) else False
         self.egg = True if (self.qty_egg >= 1) and (self.qty_egg <=2) else False
+        self.beans = True if (self.qty_beans >= 0.6 and self.qty_beans <= 1) else False
         self.aquatic_products = True if (self.frequency_aquatic_products * 7 >= 1) and (self.frequency_aquatic_products * 7 <= 3) else False
         if self.D33 is None:
+            self.qty_salt = None
             self.light_salt = None
         else:
-            self.light_salt = True if (self.D33 * 50 / 30 < 5) else False
+            self.qty_salt = self.D33 * 50 / 30
+            self.light_salt = True if (self.qty_salt < 5) else False
         self.D31 = 0 if self.D31 is None else self.D31 * 500 / 30
         self.D32 = 0 if self.D32 is None else self.D32 * 500 / 30
         self.qty_oil = None
         self.healthy_oil = None   
+        self.healthy_beverage = True if self.qty_beverage < 1 else False
             
     def count_num(self, count_list:list):
         for count_item in count_list:
@@ -252,17 +263,20 @@ class FOODS:
         for count_item in count_list:
             self._count_qty(count_item[0], count_item[1])
             
-    def _count_qty(self, type, count):
+    def _count_qty(self, type, count, weight=None):
         qty = 0
-        for attr in type:
-            food = getattr(self, attr)
+        for i in range(len(type)):
+            food = getattr(self, type[i])
+            add_qty = 0
             if food.eat == 1 and food.consume != None:
                 if food.per_day:
-                    qty += food.consume * food.per_day
+                    add_qty = food.consume * food.per_day
                 elif food.per_week:
-                    qty += food.consume * food.per_week / 7
+                    add_qty = food.consume * food.per_week / 7
                 elif food.per_month:
-                    qty += food.consume * food.per_month / 30
+                    add_qty = food.consume * food.per_month / 30
+            add_qty = add_qty * weight[i] if weight is not None else add_qty
+            qty += add_qty
         setattr(self, count, qty)
                                                     
     def __repr__(self):
@@ -373,10 +387,9 @@ class Person:
         self.cal_guideline()
     
     def data_process(self):
-        self.meals_avg_persons = self.meals_info.meals_avg_persons
-        if self.meals_avg_persons != 0:
-            self.foods_info.D31 /= self.meals_avg_persons
-            self.foods_info.D32 /= self.meals_avg_persons
+        if self.meals_info.meals_avg_persons != 0:
+            self.foods_info.D31 /= self.meals_info.meals_avg_persons
+            self.foods_info.D32 /= self.meals_info.meals_avg_persons
             self.foods_info.qty_oil = self.foods_info.D31 + self.foods_info.D32
             self.foods_info.healthy_oil = True if \
                 (self.foods_info.qty_oil >= 25 and self.foods_info.qty_oil <= 30) else False
@@ -394,11 +407,15 @@ class Person:
              ("dairy_products", self.foods_info.dairy_products),
              ("cereal", self.foods_info.cereal),
              ("lpfem", self.foods_info.lpfem),
-             ("healthy_weight", self.body_info.healthy_weight),
-             ("healthy_exercise", self.activity_info.healthy_exercise),
+             ("beans", self.foods_info.beans),
+             ("healthy_cooking", self.meals_info.healthy_cooking),
              ("healthy_oil", self.foods_info.healthy_oil),
              ("light_salt", self.foods_info.light_salt),
-             ("light_wine", self.drink_info.light_wine)])
+             ("light_wine", self.drink_info.light_wine),
+             ("healthy_beverage", self.foods_info.healthy_beverage),
+            #  ("healthy_weight", self.body_info.healthy_weight),
+            #  ("healthy_exercise", self.activity_info.healthy_exercise)
+             ])
         
         self.evaluate_info.add_qty(    
             [("num_day_foods", self.foods_info.num_day_foods),
@@ -407,12 +424,14 @@ class Person:
              ("qty_d_prods", self.foods_info.qty_dairy_products),
              ("qty_cereal", self.foods_info.qty_cereal),
              ("qty_lpfem", self.foods_info.qty_lpfem),
+             ("qty_beans", self.foods_info.qty_beans),
+             ("qty_salt", self.foods_info.qty_salt),
              ("qty_oil", self.foods_info.qty_oil),
+             ("qty_wine", self.drink_info.drink_gram),
+             ("qty_beverage", self.foods_info.qty_beverage),
+             ("ratio_at_home", self.meals_info.radio_at_home),
              ("BMI", self.body_info.BMI),
              ("exe_seconds", self.activity_info.seconds_per_day),
-             ("salt", self.foods_info.D33),
-             ("wine", self.drink_info.drink_gram),
-             ("qty_beverage", self.foods_info.qty_beverage),
              ("age", self.basic_info.age),
              ("sex", self.basic_info.sex),
              ("married", self.basic_info.married),
@@ -600,8 +619,11 @@ def draw_ratio(data, tilte="Evaluating Indicator", x_lable="",
     
     
 def draw_histogram(data, x, bins, fig_name, figsize=(14,10), font_size=12, 
-                   stat='probability',color = '#008080', ):
+                   stat='probability',color = '#008080', standard: list=None):
     sns.set(rc = {'figure.figsize':figsize})
     plt.rcParams.update({'font.size': font_size})
     sns.displot(data=data, x=x, bins=bins, stat=stat, color=color)
+    if standard is not None:
+        for value in standard:
+            plt.axvline(x=value, color='red')
     plt.savefig(fig_name)
