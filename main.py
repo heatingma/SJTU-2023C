@@ -69,7 +69,7 @@ def problem_2():
 
 
 if __name__ == '__main__':
-    # pre_work()
-    # problem_1()
+    pre_work()
+    problem_1()
     problem_2()
 
