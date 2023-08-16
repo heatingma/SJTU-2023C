@@ -1,8 +1,5 @@
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
-import matplotlib as mpl
-import seaborn as sns
 
 ###################################################################
 #                  Constant Variable Assumption                   #
@@ -60,10 +57,22 @@ class SMOKE:
         self.smoke_nums_per_day = smoke_nums_per_day
         self.passive_smoke = passive_smoke
         self.passive_smoke_days_per_week = passive_smoke_days_per_week
+        self.data_process()
+        
+    def data_process(self):
+        if self.smoke_nums_per_day is None:
+            self.qty_smoke = None
+        else:
+            self.qty_smoke = self.smoke_nums_per_day
+            if self.smoke_days_per_week is not None:
+                self.qty_smoke = self.smoke_days_per_week * self.smoke_nums_per_day / 7
+        self.qty_pas_smoke = 0 if self.passive_smoke else self.passive_smoke_days_per_week
+        self.smoke_years = None
         
     def __repr__(self):
         message = "smoke, begin_smoke, smoke_days_per_week, smoke_nums_per_day, "
-        message += "passive_smoke, passive_smoke_days_per_week"
+        message += "passive_smoke, passive_smoke_days_per_week, "
+        message += "qty_smoke, qty_pas_smoke, smoke_years"
         return f"{self.__class__.__name__}({message})"      
 
 
@@ -183,6 +192,11 @@ class ACTIVITY:
             self.healthy_exercise = False
         else:
             self.healthy_exercise = True
+        self.work_intensity = 0
+        if self.work is not None:
+            self.work_intensity += self.work
+        if self.housework is not None:
+            self.work_intensity += self.housework
         
     def __repr__(self):
         message = "work, housework, exercise, intensity, seconds_per_day"
@@ -314,6 +328,11 @@ class HEALTH:
         self.D6 = D6
         self.D7 = D7
         self.D8 = D8
+        self.data_process()
+        
+    def data_process(self):
+        self.have_hypertension = True if self.hypertension == 1 else False
+        self.have_diabetes = True if self.diabetes == 1 else False
         
     def __repr__(self):
         message = "hypertension, diabetes, D1, D2, D3, D4, D5, D6 ,D7, D8"
@@ -360,11 +379,17 @@ class BODY:
         else:
             self.BMI = None
             self.healthy_weight = None
+        self.high_uric_acid = False
+        self.hyperlipidemia = False
+        if self.BMI is None:
+            self.obesity = None
+        else:
+            self.obesity = True if (self.BMI > 28) else False
         
     def __repr__(self):
         message = "height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, "
         message += "blood_sugar, high_lipoprotein, low_lipoprotein, triglycerides, uric_acid, "
-        message += "BMI, healthy_weight"
+        message += "BMI, healthy_weight, high_uric_acid, hyperlipidemia, obesity"
         return f"{self.__class__.__name__}({message})"        
 
 
@@ -396,7 +421,31 @@ class Person:
         else:
             self.foods_info.qty_oil = 0
             self.foods_info.healthy_oil = False
-                       
+
+        if self.basic_info.sex == 1:
+            if self.body_info.uric_acid is not None:
+                self.body_info.high_uric_acid = self.body_info.uric_acid > 420
+        elif self.basic_info.sex == 2:
+            if self.body_info.uric_acid is not None:
+                self.body_info.high_uric_acid = self.body_info.uric_acid > 360
+        
+        if self.body_info.cholesterol is not None: 
+            if self.body_info.cholesterol > 5.7:
+                self.body_info.hyperlipidemia = True
+        if self.body_info.triglycerides is not None:
+            if self.body_info.triglycerides > 1.7:
+                self.body_info.hyperlipidemia = True        
+        if self.body_info.high_lipoprotein is not None:
+            if self.basic_info.sex == 1:
+                if self.body_info.high_lipoprotein < 1.04:
+                    self.body_info.hyperlipidemia = True
+            else:
+                if self.body_info.high_lipoprotein < 1.30:
+                    self.body_info.hyperlipidemia = True   
+        if self.basic_info.age is not None and \
+            self.smoke_info.begin_smoke is not None and self.smoke_info.begin_smoke != 99:
+            self.smoke_info.smoke_years = self.basic_info.age - self.smoke_info.begin_smoke
+
     def cal_guideline(self):
         self.evaluate_info = EVALUATE()
         self.evaluate_info.add_evaluate(
@@ -431,12 +480,22 @@ class Person:
              ("qty_beverage", self.foods_info.qty_beverage),
              ("ratio_at_home", self.meals_info.radio_at_home),
              ("BMI", self.body_info.BMI),
+             ("work_intensity", self.activity_info.work_intensity),
              ("exe_seconds", self.activity_info.seconds_per_day),
              ("age", self.basic_info.age),
              ("sex", self.basic_info.sex),
              ("married", self.basic_info.married),
              ("career", self.basic_info.career),
-             ("edu", self.basic_info.edu)])
+             ("edu", self.basic_info.edu),
+             ("is_smoke", self.smoke_info.smoke),
+             ("qty_smoke", self.smoke_info.qty_smoke),
+             ("qty_pas_smoke", self.smoke_info.qty_pas_smoke),
+             ("smoke_years", self.smoke_info.smoke_years),
+             ("have_hypertension", self.health_info.have_hypertension),
+             ("have_diabetes", self.health_info.have_diabetes),
+             ("have_obesity", self.body_info.obesity),
+             ("high_uric_acid", self.body_info.high_uric_acid),
+             ("hyperlipidemia", self.body_info.hyperlipidemia)])
                         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
@@ -597,33 +656,4 @@ def get_data(filename="docs/processed_data.npy"):
     return persons
 
 
-def draw_ratio(data, tilte="Evaluating Indicator", x_lable="", 
-               y_label="Ratio",fig_name="pics/evaluate_ratio.png"):
-    plt.rcParams.update({'font.size': 12})
-    plt.figure(figsize=(14, 10))
-    data = pd.DataFrame(data[:, 1:].astype(float), index=data[:, 0], columns=['False', 'True'])
-    data['name'] = data.index
-    bottom_plot = sns.barplot(x='name', y='True', data=data, color="#0000A3")
-    sns.barplot(x='name', y='False', data=data, color="#FF0000", bottom=data['True'])
-    topbar = plt.Rectangle((0, 0), 1, 1, fc="#FF0000", edgecolor='none')
-    bottombar = plt.Rectangle((0, 0), 1, 1, fc='#0000A3', edgecolor='none')
-    l = plt.legend([bottombar, topbar], ['standard', 'nonstandard'], loc=1, ncol = 2, prop={'size':8})
-    l.draw_frame(False)
-    sns.despine(left=True)
-    bottom_plot.set_ylabel(y_label)
-    bottom_plot.set_xlabel(x_lable)
-    bottom_plot.set_xticklabels(data.name, rotation=20, fontsize='small')
-    plt.ylim(0, 1.1)
-    plt.title(tilte)
-    plt.savefig(fig_name)
-    
-    
-def draw_histogram(data, x, bins, fig_name, figsize=(14,10), font_size=12, 
-                   stat='probability',color = '#008080', standard: list=None):
-    sns.set(rc = {'figure.figsize':figsize})
-    plt.rcParams.update({'font.size': font_size})
-    sns.displot(data=data, x=x, bins=bins, stat=stat, color=color)
-    if standard is not None:
-        for value in standard:
-            plt.axvline(x=value, color='red')
-    plt.savefig(fig_name)
+

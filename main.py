@@ -1,10 +1,7 @@
-from utils import get_data, read_data, draw_histogram, draw_ratio
+from data_process import get_data, read_data
+from draw import draw_histogram, draw_ratio, draw_cca, draw_corr
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
-import seaborn as sns
-from sklearn.cross_decomposition import CCA
 
 
 # GRT DATA
@@ -38,38 +35,18 @@ def problem_1():
 def problem_2():
     df = pd.read_csv("docs/processed_data.csv")
     df = df.fillna(0)
-    data = df.iloc[:,np.r_[16:35]]
-    X = data.iloc[:, np.r_[0:14]]
-    Y = data.iloc[:, np.r_[14:19]]
-    scaler = StandardScaler() 
-    X_sc = scaler.fit_transform(X) #scale data
-    Y_sc = scaler.fit_transform(Y) 
-
-    corr_coeff = data.corr()
-    plt.figure(figsize = (15, 20))
-    sns.heatmap(corr_coeff, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
-    plt.savefig("pics/corr_analysis.png")
-
-    n_comp = 2
-    cca = CCA(n_components=n_comp)
-    cca.fit(X_sc, Y_sc)
-    X_c, Y_c = cca.transform(X_sc, Y_sc)
-
-    comp_corr = [np.corrcoef(X_c[:, i], Y_c[:, i])[1][0] for i in range(n_comp)]
-    plt.figure(figsize = (5, 5))
-    plt.bar(['CC1', 'CC2'], comp_corr, color='lightgrey', width = 0.8, edgecolor='k')
-    plt.savefig("pics/bar.png")
-
-    coef_df = pd.DataFrame(np.round(cca.coef_, 2), columns = [Y.columns])
-    coef_df.index = X.columns
-    plt.figure(figsize = (10, 15))
-    sns.heatmap(coef_df, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
-    plt.xlabel("Basic Info")
-    plt.savefig("pics/CCA.png")
-
+    data = df.iloc[:,np.r_[16:36]]
+    X1 = data.iloc[:, np.r_[0:12]]
+    X2 = data.iloc[:, np.r_[12:15]]
+    Y = data.iloc[:, np.r_[15:20]]
+        
+    draw_corr(data.iloc[:, np.r_[0:12, 15:20]], "pics/corr_analysis_1.png")
+    draw_corr(data.iloc[:, np.r_[12:15, 15:20]], "pics/corr_analysis_2.png")
+    draw_cca(X1, Y, "pics/CCA_1.png")
+    draw_cca(X2, Y, "pics/CCA_2.png", figsize=(12,6))
 
 if __name__ == '__main__':
     pre_work()
-    problem_1()
-    problem_2()
+    # problem_1()
+    # problem_2()
 
