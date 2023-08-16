@@ -38,9 +38,9 @@ def problem_1():
 def problem_2():
     df = pd.read_csv("docs/processed_data.csv")
     df = df.fillna(0)
-    data = df.iloc[:,np.r_[12:30]]
-    X = df.iloc[:,np.r_[12:25]]
-    Y = df.iloc[:,np.r_[25:30]]
+    data = df.iloc[:,np.r_[16:35]]
+    X = data.iloc[:, np.r_[0:14]]
+    Y = data.iloc[:, np.r_[14:19]]
     scaler = StandardScaler() 
     X_sc = scaler.fit_transform(X) #scale data
     Y_sc = scaler.fit_transform(Y) 
@@ -69,7 +69,7 @@ def problem_2():
 
 
 if __name__ == '__main__':
-    pre_work()
-    problem_1()
+    # pre_work()
+    # problem_1()
     problem_2()
 

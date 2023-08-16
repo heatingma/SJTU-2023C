@@ -395,7 +395,7 @@ class Person:
                 (self.foods_info.qty_oil >= 25 and self.foods_info.qty_oil <= 30) else False
         else:
             self.foods_info.qty_oil = 0
-            self.foods_info.healthy_oil = 0
+            self.foods_info.healthy_oil = False
                        
     def cal_guideline(self):
         self.evaluate_info = EVALUATE()
@@ -413,8 +413,8 @@ class Person:
              ("light_salt", self.foods_info.light_salt),
              ("light_wine", self.drink_info.light_wine),
              ("healthy_beverage", self.foods_info.healthy_beverage),
-            #  ("healthy_weight", self.body_info.healthy_weight),
-            #  ("healthy_exercise", self.activity_info.healthy_exercise)
+             ("healthy_weight", self.body_info.healthy_weight),
+             ("healthy_exercise", self.activity_info.healthy_exercise)
              ])
         
         self.evaluate_info.add_qty(    
