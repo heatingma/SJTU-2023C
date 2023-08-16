@@ -379,12 +379,43 @@ class BODY:
         else:
             self.BMI = None
             self.healthy_weight = None
-        self.high_uric_acid = False
-        self.hyperlipidemia = False
-        if self.BMI is None:
-            self.obesity = False
+        
+        if self.systolic is None or self.diastolic is None:
+            self.hypertension = 0
+        elif self.systolic >= 140 or self.diastolic >= 90:
+            self.hypertension = 2
+        elif self.systolic >= 135 or self.diastolic >= 85:
+            self.hypertension = 1
         else:
-            self.obesity = True if (self.BMI > 28) else False
+            self.hypertension = 0
+            
+        if self.blood_sugar is None:
+            self.diabetes = 0
+        elif self.blood_sugar >= 7:
+            self.diabetes = 2
+        elif self.blood_sugar >= 6:
+            self.diabetes = 1
+        else:
+            self.diabetes = 0
+        
+        if self.BMI is None or self.BMI < 24:
+            self.obesity = 0
+        else:
+            self.obesity = 1 if self.BMI < 28 else 2
+
+        if self.cholesterol is None or self.triglycerides is None or \
+            self.high_lipoprotein is None or self.low_lipoprotein is None:
+            self.hyperlipidemia = 0
+        elif self.cholesterol >= 6.2 or self.triglycerides >= 2.26 or \
+            self.high_lipoprotein <= 1.04 or self.low_lipoprotein >= 4.16:
+            self.hyperlipidemia = 2
+        elif self.cholesterol >= 5.7 or self.triglycerides >= 1.7 or \
+            self.high_lipoprotein <= 1.04 or self.low_lipoprotein >= 3.37:
+            self.hyperlipidemia = 1
+        else:
+            self.hyperlipidemia = 0
+            
+        self.high_uric_acid = 0
         
     def __repr__(self):
         message = "height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, "
@@ -424,24 +455,17 @@ class Person:
 
         if self.basic_info.sex == 1:
             if self.body_info.uric_acid is not None:
-                self.body_info.high_uric_acid = self.body_info.uric_acid > 420
+                if self.body_info.uric_acid > 420:
+                    self.body_info.high_uric_acid = 2
+                elif self.body_info.uric_acid > 380:
+                    self.body_info.high_uric_acid = 1
         elif self.basic_info.sex == 2:
             if self.body_info.uric_acid is not None:
-                self.body_info.high_uric_acid = self.body_info.uric_acid > 360
-        
-        if self.body_info.cholesterol is not None: 
-            if self.body_info.cholesterol > 5.7:
-                self.body_info.hyperlipidemia = True
-        if self.body_info.triglycerides is not None:
-            if self.body_info.triglycerides > 1.7:
-                self.body_info.hyperlipidemia = True        
-        if self.body_info.high_lipoprotein is not None:
-            if self.basic_info.sex == 1:
-                if self.body_info.high_lipoprotein < 1.04:
-                    self.body_info.hyperlipidemia = True
-            else:
-                if self.body_info.high_lipoprotein < 1.30:
-                    self.body_info.hyperlipidemia = True   
+                if self.body_info.uric_acid > 360:
+                    self.body_info.high_uric_acid = 2
+                elif self.body_info.uric_acid > 320:
+                    self.body_info.high_uric_acid = 1
+         
         if self.basic_info.age is not None and \
             self.smoke_info.begin_smoke is not None and self.smoke_info.begin_smoke != 99:
             self.smoke_info.smoke_years = self.basic_info.age - self.smoke_info.begin_smoke
@@ -491,9 +515,9 @@ class Person:
              ("qty_smoke", self.smoke_info.qty_smoke),
              ("qty_pas_smoke", self.smoke_info.qty_pas_smoke),
              ("smoke_years", self.smoke_info.smoke_years),
-             ("have_hypertension", self.health_info.have_hypertension),
-             ("have_diabetes", self.health_info.have_diabetes),
-             ("have_obesity", self.body_info.obesity),
+             ("hypertension", self.body_info.hypertension),
+             ("diabetes", self.body_info.diabetes),
+             ("obesity", self.body_info.obesity),
              ("high_uric_acid", self.body_info.high_uric_acid),
              ("hyperlipidemia", self.body_info.hyperlipidemia)])
                         

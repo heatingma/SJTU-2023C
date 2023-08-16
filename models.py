@@ -3,9 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
+from sklearn.model_selection import train_test_split
 from sklearn.cross_decomposition import CCA
+from sklearn.preprocessing import StandardScaler
+import xgboost as xgb
+import shap
 
-def draw_ratio(data, tilte="Evaluating Indicator", x_lable="", 
+
+def ratio(data, tilte="Evaluating Indicator", x_lable="", 
                y_label="Ratio",fig_name="pics/evaluate_ratio.png"):
     plt.rcParams.update({'font.size': 12})
     plt.figure(figsize=(14, 10))
@@ -26,7 +31,7 @@ def draw_ratio(data, tilte="Evaluating Indicator", x_lable="",
     plt.savefig(fig_name)
     
     
-def draw_histogram(data, x, bins, fig_name, figsize=(14,10), font_size=12, 
+def histogram(data, x, bins, fig_name, figsize=(14,10), font_size=12, 
                    stat='probability',color = '#008080', standard: list=None):
     sns.set(rc = {'figure.figsize':figsize})
     plt.rcParams.update({'font.size': font_size})
@@ -36,14 +41,14 @@ def draw_histogram(data, x, bins, fig_name, figsize=(14,10), font_size=12,
             plt.axvline(x=value, color='red')
     plt.savefig(fig_name)
     
-def draw_corr(data, save_path, figsize = (15, 20)):
+def corr(data, save_path, figsize = (15, 20)):
     corr_coeff = data.corr()
     plt.figure(figsize=figsize)
     sns.heatmap(corr_coeff, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
     plt.savefig(save_path)
 
     
-def draw_cca(X, Y, save_path, figsize = (10, 15), x_label="Basic Info"):
+def cca(X, Y, save_path, figsize = (10, 15), x_label="Basic Info"):
     scaler = StandardScaler() 
     X_sc = scaler.fit_transform(X) #scale data
     Y_sc = scaler.fit_transform(Y) 
@@ -55,3 +60,27 @@ def draw_cca(X, Y, save_path, figsize = (10, 15), x_label="Basic Info"):
     sns.heatmap(coef_df, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
     plt.xlabel(x_label)
     plt.savefig(save_path)
+
+
+def xgboost_shap(X: pd.DataFrame, Y:pd.DataFrame, save_path):
+    # normalize
+    scaler = StandardScaler()
+    X_normalized = X.copy()
+    X_normalized[X.columns] = scaler.fit_transform(X)
+
+    # train the xgboot model
+    X_train, X_test, y_train, y_test = train_test_split(X_normalized, Y, test_size=0.2, random_state=42)
+    model = xgb.XGBRegressor()
+    model.fit(X_train, y_train)
+
+    # use shap to explain
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X_test)
+    
+    # form the pics
+    shap.summary_plot(shap_values, X_test, show=False)
+    plt.gcf().savefig('{}_{}.png'.format(save_path, 1), bbox_inches='tight')
+    plt.clf()
+    shap.summary_plot(shap_values, X_test, show=False, plot_type="bar",)
+    plt.gcf().savefig('{}_{}.png'.format(save_path, 2), bbox_inches='tight')   
+    plt.clf()
