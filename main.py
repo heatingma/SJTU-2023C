@@ -35,13 +35,16 @@ def problem_1():
 def problem_2():
     df = pd.read_csv("docs/processed_data.csv")
     df = df.fillna(0)
-    data = df.iloc[:,np.r_[16:36]]
-    X1 = data.iloc[:, np.r_[0:12]]
-    X2 = data.iloc[:, np.r_[12:15]]
-    Y = data.iloc[:, np.r_[15:20]]
-        
-    draw_corr(data.iloc[:, np.r_[0:12, 15:20]], "pics/corr_analysis_1.png")
-    draw_corr(data.iloc[:, np.r_[12:15, 15:20]], "pics/corr_analysis_2.png")
+    data = df.iloc[:,np.r_[1,16:36]]
+    data.iloc[0] = False
+    data = data.replace({'True': 1, 'False': 0}) 
+    data = data.astype("int")
+    X1 = data.iloc[:, np.r_[0:13]]
+    X2 = data.iloc[:, np.r_[14:16]]
+    Y = data.iloc[:, np.r_[16:21]]
+    print(data)
+    draw_corr(data.iloc[:, np.r_[0:13, 16:21]], "pics/corr_analysis_1.png")
+    draw_corr(data.iloc[:, np.r_[14:16, 16:21]], "pics/corr_analysis_2.png")
     draw_cca(X1, Y, "pics/CCA_1.png")
     draw_cca(X2, Y, "pics/CCA_2.png", figsize=(12,6))
 
