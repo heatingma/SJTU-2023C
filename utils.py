@@ -271,7 +271,9 @@ class FOOD:
 class HEALTH:
     def __init__(self, hypertension, diabetes, D1, D2, D3, D4, D5, D6 ,D7, D8) -> None:
         self.hypertension = hypertension
+        self.have_hypertension = (hypertension.ill == 1) 
         self.diabetes = diabetes
+        self.have_diabetes = (diabetes.ill == 1) 
         self.D1 = D1
         self.D2 = D2
         self.D3 = D3
@@ -320,17 +322,19 @@ class BODY:
         self.data_process()
         
     def data_process(self):
-        if self.weight and self.height:
+        if self.weight and self.height :
             self.BMI = self.weight / (self.height * self.height) * 10000
             self.healthy_weight = True if (self.BMI < 24 and self.BMI >= 18.5) else False
+            self.obesity = True if (self.BMI > 28) else False
         else:
             self.BMI = None
             self.healthy_weight = None
+            self.obesity = None
         
     def __repr__(self):
         message = "height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, "
         message += "blood_sugar, high_lipoprotein, low_lipoprotein, triglycerides, uric_acid, "
-        message += "BMI, healthy_weight"
+        message += "BMI, healthy_weight, obesity"
         return f"{self.__class__.__name__}({message})"        
 
 
@@ -365,7 +369,15 @@ class Person:
              ("healthy_exercise", self.activity_info.healthy_exercise),
              ("light_salt", self.foods_info.light_salt),
              ("light_wine", self.drink_info.light_wine)])
-        
+        if self.body_info.uric_acid is None:
+            high_uric_acid = False
+        else:
+            high_uric_acid = self.body_info.uric_acid > 420 if self.basic_info.sex == 1 else self.body_info.uric_acid > 360
+
+        if self.body_info.cholesterol is None or self.body_info.triglycerides is None or self.body_info.high_lipoprotein is None:
+            hyperlipidemia = False
+        else:
+            hyperlipidemia = self.body_info.cholesterol > 5.7 or self.body_info.triglycerides > 1.7 or self.body_info.high_lipoprotein < 1.04
         self.evaluate_info.add_qty(    
             [("num_day_foods", self.foods_info.num_day_foods),
              ("qty_f_veg", self.foods_info.qty_fresh_vegetables),
@@ -382,7 +394,15 @@ class Person:
              ("sex", self.basic_info.sex),
              ("married", self.basic_info.married),
              ("career", self.basic_info.career),
-             ("edu", self.basic_info.edu)])
+             ("edu", self.basic_info.edu),
+             ("is_smoke", self.smoke_info.smoke),
+             ("smoke_qty", self.smoke_info.smoke_nums_per_day),
+             ("have_hypertension", self.health_info.have_hypertension),
+             ("have_diabetes", self.health_info.have_diabetes),
+             ("have_obesity", self.body_info.obesity),
+             ("high_uric_acid",high_uric_acid),
+             ("hyperlipidemia", hyperlipidemia)]
+             )
                         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
@@ -432,7 +452,7 @@ class Persons:
         for person in self.person_dict.values():
             append_data = getattr(person.evaluate_info, "evaluate_dict")
             append_data.update(getattr(person.evaluate_info, "qty_dict"))
-            person_data = person_data._append(append_data, ignore_index = True)
+            person_data = person_data.append(append_data, ignore_index = True)
         person_data.to_csv("docs/processed_data.csv")
 
     def get_line_data(self, attrs:list, name):
