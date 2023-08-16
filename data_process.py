@@ -316,29 +316,6 @@ class FOOD:
         return f"{self.__class__.__name__}({message})"           
         
         
-class HEALTH:
-    def __init__(self, hypertension, diabetes, D1, D2, D3, D4, D5, D6 ,D7, D8) -> None:
-        self.hypertension = hypertension
-        self.diabetes = diabetes
-        self.D1 = D1
-        self.D2 = D2
-        self.D3 = D3
-        self.D4 = D4
-        self.D5 = D5
-        self.D6 = D6
-        self.D7 = D7
-        self.D8 = D8
-        self.data_process()
-        
-    def data_process(self):
-        self.have_hypertension = True if self.hypertension == 1 else False
-        self.have_diabetes = True if self.diabetes == 1 else False
-        
-    def __repr__(self):
-        message = "hypertension, diabetes, D1, D2, D3, D4, D5, D6 ,D7, D8"
-        return f"{self.__class__.__name__}({message})"        
-    
-    
 class DISEASE:
     def __init__(self, last, ill, methods, medication, control_diet, exercise, others):
         self.last = last
@@ -352,7 +329,30 @@ class DISEASE:
     def __repr__(self):
         message = "last, ill, methods, medication, control_diet, exercise, others"
         return f"{self.__class__.__name__}({message})"  
-    
+       
+       
+class HEALTH:
+    def __init__(self, hypertension:DISEASE, diabetes:DISEASE, D1, D2, D3, D4, D5, D6 ,D7, D8) -> None:
+        self.hypertension = hypertension
+        self.diabetes = diabetes
+        self.D1 = D1
+        self.D2 = D2
+        self.D3 = D3
+        self.D4 = D4
+        self.D5 = D5
+        self.D6 = D6
+        self.D7 = D7
+        self.D8 = D8
+        self.data_process()
+        
+    def data_process(self):
+        self.have_hypertension = True if self.hypertension.ill == 1 else False
+        self.have_diabetes = True if self.diabetes.ill == 1 else False
+        
+    def __repr__(self):
+        message = "hypertension, diabetes, D1, D2, D3, D4, D5, D6 ,D7, D8"
+        return f"{self.__class__.__name__}({message})"        
+
               
 class BODY:
     def __init__(self, height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, 
@@ -382,7 +382,7 @@ class BODY:
         self.high_uric_acid = False
         self.hyperlipidemia = False
         if self.BMI is None:
-            self.obesity = None
+            self.obesity = False
         else:
             self.obesity = True if (self.BMI > 28) else False
         
