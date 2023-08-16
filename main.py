@@ -25,24 +25,25 @@ def problem_1():
     draw_ratio(data.evaluate_ratio)
     # histogram pics
     df = pd.read_csv("docs/processed_data.csv")
-    draw_histogram(df, "qty_f_veg", [x for x in range(30)], "pics/fresh_vegtables.png")
-    draw_histogram(df, "num_day_foods", 15, "pics/num_day_foods.png")
-    draw_histogram(df, "qty_f_fruits", [x for x in range(16)], "pics/quantity_fresh_fruits.png")
-    draw_histogram(df, "qty_d_prods", [x for x in range(11)], "pics/dairy_products.png")
-    draw_histogram(df, "qty_cereal", [x for x in range(6)], "pics/quantity_cereal.png")
-    draw_histogram(df, "qty_lpfem", [x for x in range(25)], "pics/quantity_lpfem.png")
-    draw_histogram(df, "salt", [x for x in range(30)], "pics/salt.png")
-    draw_histogram(df, "wine", [x for x in range(10)], "pics/wine.png")
-    draw_histogram(df, "qty_beverage", [x for x in np.arange(0,1.2,0.05)], "pics/quantity_beverage.png")
+    draw_histogram(df, "qty_f_veg", [x for x in range(0, 30, 2)], "pics/fresh_vegtables.png")
+    draw_histogram(df, "num_day_foods", [x for x in range(0, 20, 2)], "pics/num_day_foods.png")
+    draw_histogram(df, "qty_f_fruits", [x for x in np.arange(0, 8, 0.5)], "pics/quantity_fresh_fruits.png")
+    draw_histogram(df, "qty_d_prods", [x for x in np.arange(0, 8, 0.5)], "pics/dairy_products.png")
+    draw_histogram(df, "qty_cereal", [x for x in np.arange(0, 5, 0.5)], "pics/quantity_cereal.png")
+    draw_histogram(df, "qty_lpfem", [x for x in range(0, 26, 2)], "pics/quantity_lpfem.png")
+    draw_histogram(df, "qty_oil", [x for x in range(0, 150, 10)], "pics/quantity_oil.png")
+    draw_histogram(df, "salt", [x for x in range(0, 30, 2)], "pics/salt.png")
+    draw_histogram(df, "wine", [x for x in np.arange(0, 50, 5)], "pics/wine.png")
+    draw_histogram(df, "qty_beverage", [x for x in np.arange(0, 1.2, 0.05)], "pics/quantity_beverage.png")
 
 
 # PROBLEM-2-CCA
 def problem_2():
     df = pd.read_csv("docs/processed_data.csv")
     df = df.fillna(0)
-    data = df.iloc[:,np.r_[12:28]]
-    X = df.iloc[:,np.r_[12:23]]
-    Y = df.iloc[:,np.r_[23:28]]
+    data = df.iloc[:,np.r_[12:29]]
+    X = df.iloc[:,np.r_[12:24]]
+    Y = df.iloc[:,np.r_[24:29]]
     scaler = StandardScaler() 
     X_sc = scaler.fit_transform(X) #scale data
     Y_sc = scaler.fit_transform(Y) 
