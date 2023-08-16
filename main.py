@@ -3,8 +3,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 import seaborn as sns
 from sklearn.cross_decomposition import CCA
+from sklearn import metrics
+from sklearn.metrics import classification_report
 
 
 # GRT DATA
@@ -65,9 +69,48 @@ def problem_2():
     plt.xlabel("Basic Info")
     plt.savefig("pics/CCA.png")
 
+def problem_3() : 
+    df=pd.read_csv("docs/processed_data.csv")
+    df = df.fillna(0)
+    x = df.iloc[:,np.r_[12:18,19:23, 26, 28:30]].astype('float')
+    scaler = StandardScaler() 
+    X = scaler.fit_transform(X = x)
+    df['low'] = (1-df.have_hypertension.astype(int))*(1-df.high_uric_acid.astype(int) )* (1 - df.hyperlipidemia.astype(int))
+    y = df.iloc[:,np.r_[35]].astype('int')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.001, random_state=16)
+    logreg = LogisticRegression(random_state=15, class_weight = "balanced")
+    logreg.fit(X_train, y_train)
+
+    cnf_matrix = metrics.confusion_matrix(y_test, y_pred)
+    y_pred = logreg.predict(X_test)
+
+    class_names=[0,1] # name  of classes
+    fig, ax = plt.subplots()
+    tick_marks = np.arange(len(class_names))
+    plt.xticks(tick_marks, class_names)
+    plt.yticks(tick_marks, class_names)
+    # create heatmap
+    sns.heatmap(pd.DataFrame(cnf_matrix), annot=True, cmap="YlGnBu" ,fmt='g')
+    ax.xaxis.set_label_position("top")
+    plt.tight_layout()
+    plt.title('Confusion matrix', y=1.1)
+    plt.ylabel('Actual label')
+    plt.xlabel('Predicted label')
+    plt.show()
+    target_names = ['without diabetes', 'with diabetes']
+    print(classification_report(y_test, y_pred, target_names=target_names))
+
+    coef_LR = pd.Series(logreg.coef_.flatten(),index = x.columns,name = 'Var')
+
+    plt.figure(figsize=(8,8))
+    coef_LR.sort_values().plot(kind='barh')
+    plt.title("Variances Importances")
+    plt.show()
+
 
 if __name__ == '__main__':
     pre_work()
     problem_1()
     problem_2()
+    problem_3()
 
