@@ -101,6 +101,7 @@ def xgboost_shap(X: pd.DataFrame, Y:pd.DataFrame, save_path):
 def chi_square_test(data):
     c_table = pd.crosstab(data["age_group"],data["disease"],margins=True)
     print(c_table)
-    f_obs = np.array([c_table.iloc[0][0:3].values,c_table.iloc[1][0:3].values,c_table.iloc[2][0:3].values])
+    f_obs = np.array([c_table.iloc[0][0:3].values, \
+        c_table.iloc[1][0:3].values,c_table.iloc[2][0:3].values])
     print(f_obs)
     print(stats.chi2_contingency(f_obs))
