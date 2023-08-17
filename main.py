@@ -1,5 +1,5 @@
 from data_process import get_data, read_data
-from models import histogram, ratio, cca, corr, xgboost_shap
+from models import histogram, ratio, cca, corr, xgboost_shap, chi_square_test
 import pandas as pd
 import numpy as np
 
@@ -68,6 +68,12 @@ def problem_3():
         
 
 def problem_4():
+    # chi_square_test
+    df = pd.read_csv("docs/processed_data.csv")
+    df = df.fillna(0)
+    data = df.iloc[:,-2:]
+    chi_square_test(data)
+    
     # read data
     df = pd.read_csv("docs/processed_data_young.csv")
     df = df.fillna(0)
@@ -112,9 +118,8 @@ def problem_4():
 
 
 if __name__ == '__main__':
-    # pre_work()
-    # problem_1()
-    # problem_2()
-    # problem_3()
+    pre_work()
+    problem_1()
+    problem_2()
+    problem_3()
     problem_4()
-

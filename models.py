@@ -8,6 +8,7 @@ from sklearn.cross_decomposition import CCA
 from sklearn.preprocessing import StandardScaler
 import xgboost as xgb
 import shap
+from scipy import stats
 
 
 def ratio(data, save_path, tilte="Evaluating Indicator", x_lable="", 
@@ -57,6 +58,7 @@ def corr(data:pd.DataFrame, save_path, figsize = (15, 20), symmetry=True,
     plt.savefig(save_path)
     plt.clf()
     
+
 def cca(X, Y, save_path, figsize = (10, 15), x_label="Basic Info"):
     scaler = StandardScaler() 
     X_sc = scaler.fit_transform(X) #scale data
@@ -70,6 +72,7 @@ def cca(X, Y, save_path, figsize = (10, 15), x_label="Basic Info"):
     plt.xlabel(x_label)
     plt.savefig(save_path)
     plt.clf()
+
 
 def xgboost_shap(X: pd.DataFrame, Y:pd.DataFrame, save_path):
     # normalize
@@ -94,3 +97,10 @@ def xgboost_shap(X: pd.DataFrame, Y:pd.DataFrame, save_path):
     plt.gcf().savefig('{}_{}.png'.format(save_path, 2), bbox_inches='tight')   
     plt.clf()
     
+
+def chi_square_test(data):
+    c_table = pd.crosstab(data["age_group"],data["disease"],margins=True)
+    print(c_table)
+    f_obs = np.array([c_table.iloc[0][0:3].values,c_table.iloc[1][0:3].values,c_table.iloc[2][0:3].values])
+    print(f_obs)
+    print(stats.chi2_contingency(f_obs))
