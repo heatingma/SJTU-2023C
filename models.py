@@ -10,8 +10,8 @@ import xgboost as xgb
 import shap
 
 
-def ratio(data, tilte="Evaluating Indicator", x_lable="", 
-               y_label="Ratio",fig_name="pics/evaluate_ratio.png"):
+def ratio(data, save_path, tilte="Evaluating Indicator", x_lable="", 
+               y_label="Ratio"):
     plt.rcParams.update({'font.size': 12})
     plt.figure(figsize=(14, 10))
     data = pd.DataFrame(data[:, 1:].astype(float), index=data[:, 0], columns=['False', 'True'])
@@ -28,7 +28,7 @@ def ratio(data, tilte="Evaluating Indicator", x_lable="",
     bottom_plot.set_xticklabels(data.name, rotation=20, fontsize='small')
     plt.ylim(0, 1.1)
     plt.title(tilte)
-    plt.savefig(fig_name)
+    plt.savefig(save_path)
     
     
 def histogram(data, x, bins, fig_name, figsize=(14,10), font_size=12, 
@@ -55,7 +55,7 @@ def corr(data:pd.DataFrame, save_path, figsize = (15, 20), symmetry=True,
     plt.figure(figsize=figsize)
     sns.heatmap(data, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
     plt.savefig(save_path)
-
+    plt.clf()
     
 def cca(X, Y, save_path, figsize = (10, 15), x_label="Basic Info"):
     scaler = StandardScaler() 
@@ -66,10 +66,10 @@ def cca(X, Y, save_path, figsize = (10, 15), x_label="Basic Info"):
     coef_df = pd.DataFrame(np.round(cca.coef_, 2), columns = [Y.columns])
     coef_df.index = X.columns
     plt.figure(figsize=figsize)
-    sns.heatmap(coef_df, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
+    sns.heatmap(coef_df.T, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
     plt.xlabel(x_label)
     plt.savefig(save_path)
-
+    plt.clf()
 
 def xgboost_shap(X: pd.DataFrame, Y:pd.DataFrame, save_path):
     # normalize
