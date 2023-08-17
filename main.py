@@ -72,12 +72,12 @@ def problem_3():
     Y = df.iloc[:,np.r_[40:45, 46]]
     # cca
     cca(X, Y,"pics/problem3/CCA_3.png", figsize=(30, 10))
-    # corr
-    # corr(Y, "pics/problem3/coor_diseases.png", figsize=(12, 12))
-    # # # xgboost-shap
-    # for i in range(Y.shape[1]):
-    #     y = Y.iloc[:,np.r_[i]]
-    #     xgboost_shap(X, y, "pics/problem3/"+y.columns.item())
+    corr
+    corr(Y, "pics/problem3/coor_diseases.png", figsize=(12, 12))
+    # xgboost-shap
+    for i in range(Y.shape[1]):
+        y = Y.iloc[:,np.r_[i]]
+        xgboost_shap(X, y, "pics/problem3/"+y.columns.item())
         
 
 def problem_4():
@@ -95,7 +95,7 @@ def problem_4():
     cca(X, Y, "pics/problem4/young/CCA_young.png", figsize=(25, 12))
     # corr
     corr(Y, "pics/problem4/young/coor_diseases_young.png", figsize=(12, 12))
-    # # xgboost-shap
+    # xgboost-shap
     for i in range(Y.shape[1]):
         y = Y.iloc[:,np.r_[i]]
         xgboost_shap(X, y, "pics/problem4/young/"+y.columns.item()+"_young")
@@ -109,7 +109,7 @@ def problem_4():
     cca(X, Y, "pics/problem4/mid/CCA_mid.png", figsize=(25, 12))
     # corr
     corr(Y, "pics/problem4/mid/coor_diseases_mid.png", figsize=(12, 12))
-    # # xgboost-shap
+    # xgboost-shap
     for i in range(Y.shape[1]):
         y = Y.iloc[:,np.r_[i]]
         xgboost_shap(X, y, "pics/problem4/mid/"+y.columns.item()+"_mid")
@@ -123,15 +123,15 @@ def problem_4():
     cca(X, Y, "pics/problem4/old/CCA_old.png", figsize=(25, 12))
     # corr
     corr(Y, "pics/problem4/old/coor_diseases_old.png", figsize=(12, 12))
-    # # xgboost-shap
+    # xgboost-shap
     for i in range(Y.shape[1]):
         y = Y.iloc[:,np.r_[i]]
         xgboost_shap(X, y, "pics/problem4/old/"+y.columns.item()+"_old")
 
 
 if __name__ == '__main__':
-    # pre_work()
-    # problem_1()
-    # problem_2()
+    pre_work()
+    problem_1()
+    problem_2()
     problem_3()
-    # problem_4()
+    problem_4()
