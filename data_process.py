@@ -426,6 +426,7 @@ class BODY:
             self.hyperlipidemia = 0
             
         self.high_uric_acid = 0
+        self.disease = 0
         
     def __repr__(self):
         message = "height, weight, waist, hip, systolic, diastolic, pulse, cholesterol, "
@@ -479,7 +480,23 @@ class Person:
         if self.basic_info.age is not None and \
             self.smoke_info.begin_smoke is not None and self.smoke_info.begin_smoke != 99:
             self.smoke_info.smoke_years = self.basic_info.age - self.smoke_info.begin_smoke
+                    
+        self.body_info.disease = self.check_disease([self.body_info.hypertension,
+                                          self.body_info.diabetes,
+                                          self.body_info.obesity,
+                                          self.body_info.high_uric_acid,
+                                          self.body_info.hyperlipidemia])
 
+    def check_disease(self, diseases: list):
+        flag = 0
+        for disease in diseases:
+            if disease == 2:
+                flag = 2
+                break
+            elif disease == 1:
+                flag = 1
+        return flag
+    
     def cal_guideline(self):
         self.evaluate_info = EVALUATE()
         self.evaluate_info.add_evaluate(
@@ -530,7 +547,8 @@ class Person:
              ("obesity", self.body_info.obesity),
              ("high_uric_acid", self.body_info.high_uric_acid),
              ("hyperlipidemia", self.body_info.hyperlipidemia),
-             ("age_group", self.basic_info.age_group)])
+             ("age_group", self.basic_info.age_group),
+             ("disease", self.body_info.disease)])
                         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
