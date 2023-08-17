@@ -41,10 +41,19 @@ def histogram(data, x, bins, fig_name, figsize=(14,10), font_size=12,
             plt.axvline(x=value, color='red')
     plt.savefig(fig_name)
     
-def corr(data, save_path, figsize = (15, 20)):
-    corr_coeff = data.corr()
+
+def corr(data:pd.DataFrame, save_path, figsize = (15, 20), symmetry=True, 
+         x: list=None, y: list=None):
+    scaler = StandardScaler() 
+    data_normalized = scaler.fit_transform(data)
+    data = pd.DataFrame(data=data_normalized, columns=data.columns)
+    data = data.corr()
+    if symmetry == False:
+        assert x is not None and y is not None, f'if symmetry is False, x and y must be given.'
+        data = data.iloc[x, y]
+
     plt.figure(figsize=figsize)
-    sns.heatmap(corr_coeff, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
+    sns.heatmap(data, cmap='coolwarm', annot=True, linewidths=1, vmin=-1)
     plt.savefig(save_path)
 
     
@@ -84,3 +93,4 @@ def xgboost_shap(X: pd.DataFrame, Y:pd.DataFrame, save_path):
     shap.summary_plot(shap_values, X_test, show=False, plot_type="bar",)
     plt.gcf().savefig('{}_{}.png'.format(save_path, 2), bbox_inches='tight')   
     plt.clf()
+    

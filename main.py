@@ -42,8 +42,10 @@ def problem_2():
     X1 = data.iloc[:, np.r_[0:13]]
     X2 = data.iloc[:, np.r_[14:16]]
     Y = data.iloc[:, np.r_[16:21]]
-    corr(data.iloc[:, np.r_[0:13, 16:21]], "pics/corr_analysis_1.png")
-    corr(data.iloc[:, np.r_[14:16, 16:21]], "pics/corr_analysis_2.png")
+    corr(data.iloc[:, np.r_[0:13, 16:21]], "pics/corr_analysis_1.png", 
+         symmetry=False, x=np.r_[0:13], y=np.r_[13:18])
+    corr(data.iloc[:, np.r_[14:16, 16:21]], "pics/corr_analysis_2.png", 
+         figsize=(12, 6), symmetry=False, x=np.r_[0:2], y=np.r_[2:7])
     cca(X1, Y, "pics/CCA_1.png")
     cca(X2, Y, "pics/CCA_2.png", figsize=(12,6))
 
@@ -56,18 +58,22 @@ def problem_3():
     X = df.iloc[:,np.r_[1, 16:28, 29:31]]
     Y = df.iloc[:,np.r_[40:45]]
     # cca
-    cca(X, Y, "pics/CCA_3.png", figsize=(12, 18))
+    cca(Y, X, "pics/CCA_3.png", figsize=(25, 12))
     # corr
     corr(Y, "pics/coor_diseases.png", figsize=(12, 12))
     # # xgboost-shap
     for i in range(Y.shape[1]):
         y = Y.iloc[:,np.r_[i]]
         xgboost_shap(X, y, "pics/"+y.columns.item())
-    
+        
+
+def problem_4():
+    pass
+
 if __name__ == '__main__':
-    # pre_work()
+    pre_work()
     # problem_1()
     # problem_2()
-    problem_3()
+    # problem_3()
     
 

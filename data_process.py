@@ -41,10 +41,20 @@ class BASIC:
         self.edu = edu
         self.married = married
         self.career = career
-        self.age = 2023-self.birth
+        self.data_process()
         
+    def data_process(self):
+        self.age = 2023-self.birth
+        if self.age is None or self.age <= 44:
+            self.age_group = 0
+        elif self.age < 60:
+            self.age_group = 1
+        else:
+            self.age_group = 2
+            
     def __repr__(self):
-        message = "id, birth, sex, nation, nation_name, edu, married, career"
+        message = "id, birth, sex, nation, nation_name, edu, married, "
+        message += "career, age, age_group"
         return f"{self.__class__.__name__}({message})"        
        
         
@@ -519,7 +529,8 @@ class Person:
              ("diabetes", self.body_info.diabetes),
              ("obesity", self.body_info.obesity),
              ("high_uric_acid", self.body_info.high_uric_acid),
-             ("hyperlipidemia", self.body_info.hyperlipidemia)])
+             ("hyperlipidemia", self.body_info.hyperlipidemia),
+             ("age_group", self.basic_info.age_group)])
                         
     def __repr__(self):
         message = "basic_info, smoke_info, drink_info, meals_info, foods_info, " 
@@ -566,11 +577,25 @@ class Persons:
     
     def get_dataframe(self):
         person_data = pd.DataFrame()
+        person_data_young = pd.DataFrame()
+        person_data_mid = pd.DataFrame()
+        person_data_old = pd.DataFrame()
+        
         for person in self.person_dict.values():
             append_data = getattr(person.evaluate_info, "evaluate_dict")
             append_data.update(getattr(person.evaluate_info, "qty_dict"))
             person_data = person_data._append(append_data, ignore_index = True)
+            if person.basic_info.age_group == 0:
+                person_data_young = person_data_young._append(append_data, ignore_index = True)
+            elif person.basic_info.age_group == 1:
+                person_data_mid = person_data_mid._append(append_data, ignore_index = True)
+            else:
+                person_data_old = person_data_old._append(append_data, ignore_index = True)
+            
         person_data.to_csv("docs/processed_data.csv")
+        person_data_young.to_csv("docs/processed_data_young.csv")
+        person_data_mid.to_csv("docs/processed_data_mid.csv")
+        person_data_old.to_csv("docs/processed_data_old.csv")
 
     def get_line_data(self, attrs:list, name):
         total_val = 0
